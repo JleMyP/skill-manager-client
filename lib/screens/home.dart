@@ -131,6 +131,12 @@ class LeftMenu extends StatelessWidget {
           title: Text('Проекты'),
           onTap: () {},
         ),
+        Divider(height: 5),
+        ListTile(
+            leading: Icon(Icons.label),
+            title: Text('Метки'),
+            onTap: () {},
+        ),
         Divider(height: 50),
         // TODO: не рендерить консольку в release mode или по флагам
         ListTile(

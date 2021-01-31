@@ -5,6 +5,8 @@ class ImportedResource extends BaseModel {
   final String description;
   final bool isIgnored;
   final DateTime createdAt;
+  final String type;
+  final Map<String, dynamic> typeSpecific;
 
   ImportedResource({
     id,
@@ -12,5 +14,7 @@ class ImportedResource extends BaseModel {
     this.description,
     this.isIgnored,
     this.createdAt,
+    this.type,
+    this.typeSpecific,
   }): super(id: id);
 }

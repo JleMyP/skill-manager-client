@@ -80,6 +80,16 @@ abstract class BaseRestRepository<T> {
     }
   }
 
+  Future<void> updateItem(int itemId, Map<String, dynamic> data) async {
+    if (_client.fake) {
+      if (_client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: _client.netDelay));
+      }
+    } else {
+      await _client.patch('$baseUrl/$itemId/', data);
+    }
+  }
+
   T parseItemFromList(Map<String, dynamic> item);
   T parseItemFromDetail(Map<String, dynamic> item);
   T fakeItemForList(int i);

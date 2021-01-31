@@ -17,6 +17,8 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
       description: item['description'],
       isIgnored: item['is_ignored'],
       createdAt: DateTime.parse(item['created_at']),
+      type: item['resourcetype'],
+      typeSpecific: item['type_specific'],
     );
   }
 

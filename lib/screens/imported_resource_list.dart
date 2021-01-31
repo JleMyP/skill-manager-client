@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/imported_resource.dart';
 import '../repos/imported_resources.dart';
@@ -54,6 +55,13 @@ class Body extends StatefulWidget {
 class BodyState extends State<Body> {
   int _prevScreen;
   LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator;
+  Widget github = SvgPicture.asset(
+    'assets/github-logo.svg',
+    width: 30,
+    alignment: Alignment.centerLeft,
+    color: Colors.grey,
+  );
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,11 +125,22 @@ class BodyState extends State<Body> {
       );
     }
 
+    final typeMap = <String, Widget>{
+      'importedresourcerepo': github,
+    };
+
     var item = paginator.items[index];
     return Slidable(
       actionPane: SlidableDrawerActionPane(),
       child: ListTile(
+        leading: typeMap[item.type],
         title: Text(item.name),
+        subtitle: Text(item.description ?? ''),
+        trailing: IconButton(
+          icon: Icon(item.isIgnored ? Icons.visibility_off : Icons.visibility),
+          color: Colors.grey,
+          onPressed: () async => await _changeIgnore(item),
+        ),
         onTap: () async => await _openItem(item),
       ),
       actions: [
@@ -176,7 +195,9 @@ class BodyState extends State<Body> {
   }
 
   _openItem(ImportedResource item) async {
-    await Navigator.of(context).pushNamed('/imported_resource/view', arguments: item);
+    var repo = context.read<ImportedResourceRepo>();
+    var detailed = await repo.getDetail(item.id);
+    await Navigator.of(context).pushNamed('/imported_resource/view', arguments: detailed);
   }
 
   _editItem(ImportedResource item) async {
@@ -184,14 +205,20 @@ class BodyState extends State<Body> {
   }
 
   _deleteItem(ImportedResource item) async {
-    var confirm = await showConfirmDialog(
-        context, 'Удалить импортированный ресурс?', item.name);
+    var confirm = await showConfirmDialog(context, 'Удалить импортированный ресурс?', item.name);
     if (!confirm) {
       return;
     }
 
     await paginator.deleteItem(item);
     setState(() {});
+  }
+
+  _changeIgnore(ImportedResource item) async {
+    var repo = context.read<ImportedResourceRepo>();
+    await repo.updateItem(item.id, {'is_ignored': !item.isIgnored});
+    // TODO: обновить пагинатор
+    // item.isIgnored = !item.isIgnored;
   }
 }
 
@@ -208,8 +235,8 @@ class ConvexBottomBar extends StatelessWidget {
       color: theme.backgroundColor,
       items: [
         TabItem(icon: Icons.home, title: 'Все'),
-        TabItem(icon: Icons.map, title: 'Игнор'),
-        TabItem(icon: Icons.add, title: 'Не игнор'),
+        TabItem(icon: Icons.visibility_off, title: 'Игнор'),
+        TabItem(icon: Icons.visibility, title: 'Не игнор'),
       ],
       onTap: (i) => _onItemTapped(screen, i),
     );
