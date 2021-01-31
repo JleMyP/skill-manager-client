@@ -33,7 +33,9 @@ dependencies:
   logger: ^0.9.4
   logger_flutter:
     git: https://github.com/ewertonrp/logger_flutter.git
-  dio_http_formatter: ^1.0.2
+  # dio_http_formatter: ^1.0.2
+  dio_http_formatter:
+    git: https://github.com/JleMyP/dio_http_formatter.git
   convex_bottom_bar: ^2.6.0
   shrink_sidemenu: ^1.0.0
   flutter_slidable: ^0.5.4

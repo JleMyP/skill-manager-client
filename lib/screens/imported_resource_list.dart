@@ -22,8 +22,17 @@ class ImportedResourceListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SelectedScreenStore>(
-      create: (context) => SelectedScreenStore(),
+    var repo = context.watch<ImportedResourceRepo>();
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<SelectedScreenStore>(
+          create: (context) => SelectedScreenStore(),
+        ),
+        ChangeNotifierProvider<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>(
+          create: (context) => LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>.withRepo(repo),
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: Text('Импортированные ресурсы'),
@@ -54,7 +63,6 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   int _prevScreen;
-  LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator;
   Widget github = SvgPicture.asset(
     'assets/github-logo.svg',
     width: 30,
@@ -65,24 +73,33 @@ class BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
-    var repo = context.watch<ImportedResourceRepo>();
+    var paginator = context.watch<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
     var screen = context.watch<SelectedScreenStore>().screen;
 
-    if (repo != paginator?.repo) {
-      if (paginator == null) {
-        paginator = LimitOffsetPaginator.withRepo(repo);
-      } else {
-        paginator.repo = repo;
-      }
-    }
-
     if (screen != _prevScreen) {
-      _changeScreen(screen);
+      _changeScreen(screen, paginator);
       return Center(child: CircularProgressIndicator());
     }
 
-    if (paginator.isEnd && paginator.items.isEmpty) {
+    if (paginator.isEnd && (paginator.items?.isEmpty ?? true)) {
       return Center(child: Text('ниче нету...'));
+    }
+
+    if (paginator.loadingIsFailed) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text('Шот не удалось...'),
+          RaisedButton(
+            child: Text('Повторить'),
+            onPressed: () {
+              paginator.loadingIsFailed = false;
+              setState(() {});
+            },
+          )
+        ],
+      );
     }
 
     return RefreshIndicator(
@@ -97,6 +114,7 @@ class BodyState extends State<Body> {
   }
 
   Widget _buildListItem(BuildContext context, int index) {
+    var paginator = context.read<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
     if (index == paginator.items.length && !paginator.isEnd) {
       if (paginator.loadingIsFailed) {
         return Padding(
@@ -116,7 +134,7 @@ class BodyState extends State<Body> {
         );
       }
 
-      _fetchNext();
+      _fetchNext(paginator);
       return Center(
         child: Padding(
           padding: EdgeInsets.only(bottom: 15, top: 10),
@@ -126,7 +144,7 @@ class BodyState extends State<Body> {
     }
 
     final typeMap = <String, Widget>{
-      'importedresourcerepo': github,
+      'ImportedResourceRepo': github,
     };
 
     var item = paginator.items[index];
@@ -166,7 +184,7 @@ class BodyState extends State<Body> {
     );
   }
 
-  _changeScreen(int index) async {
+  _changeScreen(int index, LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator) async {
     if (index == 0) {
       paginator.setParams(null);
     } else if (index == 1) {
@@ -178,16 +196,16 @@ class BodyState extends State<Body> {
     }
 
     _prevScreen = index;
-    await _fetchNext();
+    await _fetchNext(paginator);
   }
 
-  _fetchNext() async {
+  _fetchNext(LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator) async {
     await paginator.fetchNext();
-    setState(() {});
   }
 
   Future _refresh() async {
-    await _changeScreen(_prevScreen);
+    var paginator = context.read<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
+    await _changeScreen(_prevScreen, paginator);
   }
 
   _createResource(ImportedResource item) async {
@@ -210,14 +228,16 @@ class BodyState extends State<Body> {
       return;
     }
 
+    var paginator = context.read<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
     await paginator.deleteItem(item);
-    setState(() {});
   }
 
   _changeIgnore(ImportedResource item) async {
     var repo = context.read<ImportedResourceRepo>();
-    await repo.updateItem(item.id, {'is_ignored': !item.isIgnored});
+    await repo.updateItem(item.id, {'is_ignored': !item.isIgnored,
+                                    'resourcetype': item.type});
     // TODO: обновить пагинатор
+    // TODO: отлов ошибок
     // item.isIgnored = !item.isIgnored;
   }
 }

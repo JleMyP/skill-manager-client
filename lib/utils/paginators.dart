@@ -38,6 +38,8 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     _params = null;
     _items?.clear();
     count = null;
+    loadingIsFailed = false;
+    notifyListeners();
   }
 
   Future<List<K>> fetchNext() async {
@@ -57,6 +59,7 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
       pair = await repo.getList(params: _params);
     } on Exception {
       loadingIsFailed = true;
+      notifyListeners();
       return null;
     }
 
@@ -66,6 +69,7 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     } else {
       _items.addAll(pair.result);
     }
+    notifyListeners();
     return pair.result;
   }
 
@@ -73,5 +77,6 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     await repo.deleteItem(item.id);
     _items.remove(item);
     count -= 1;
+    notifyListeners();
   }
 }
