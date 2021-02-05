@@ -8,6 +8,7 @@ import '../repos/user.dart';
 import '../utils/dialogs.dart';
 import '../utils/store.dart';
 import 'imported_resource_list.dart';
+import 'tag_list.dart';
 
 
 class HomePageWrapper extends StatelessWidget {
@@ -43,6 +44,9 @@ class HomePage extends StatelessWidget {
     switch (page) {
       case ImportedResourceListPage.name:
         body = ImportedResourceListPage(_sideMenuTap, state);
+        break;
+      case TagListPage.name:
+        body = TagListPage(_sideMenuTap, state);
         break;
     }
 
@@ -118,9 +122,13 @@ class LeftMenu extends StatelessWidget {
         ),
         Divider(height: 5),
         ListTile(
-            leading: Icon(Icons.label),
-            title: Text('Метки'),
-            onTap: () {},
+          selected: store.page == TagListPage.name,
+          leading: Icon(Icons.label),
+          title: Text('Метки'),
+          onTap: () {
+            store.page = TagListPage.name;
+            sideMenuTap();
+          },
         ),
         Divider(height: 50),
         // TODO: не рендерить консольку в release mode или по флагам

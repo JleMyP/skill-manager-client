@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'repos/imported_resources.dart';
+import 'repos/tag.dart';
 import 'repos/user.dart';
 import 'screens/home.dart';
 import 'screens/imported_resource_edit.dart';
@@ -48,6 +49,10 @@ void main() {
       ),
       ProxyProvider<HttpApiClient, ImportedResourceRepo>(
         create: (context) => ImportedResourceRepo(),
+        update: (context, client, repo) => repo..client = client,
+      ),
+      ProxyProvider<HttpApiClient, TagRepo>(
+        create: (context) => TagRepo(),
         update: (context, client, repo) => repo..client = client,
       ),
     ],
