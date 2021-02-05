@@ -9,7 +9,7 @@ import 'logger.dart';
 
 
 class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
-    with ChangeNotifier {
+    extends ChangeNotifier {  // TODO: stream?
   T repo;
   Map<String, dynamic> _params;
   List<K> _items;
@@ -17,7 +17,8 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
   int limit = 25;
   int count;
   dynamic lastException;
-  StackTrace lastSt;  Logger logger;
+  StackTrace lastSt;
+  Logger logger;
 
   bool isLoading = false;
 
@@ -49,11 +50,13 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     _items?.clear();
     count = null;
     loadingIsFailed = false;
-    notifyListeners();
+    lastException = null;
+    lastSt = null;
+    isLoading = false;
   }
 
-  Future<List<K>> fetchNext() async {
-    if (_params == null) {  // еще не скачали первую страницу
+  Future<List<K>> fetchNext({bool notifyStart = true}) async {
+    if (_items == null || _params == null) {  // еще не скачали первую страницу
       _params = {
         'limit': limit,
         'offset': 0,
@@ -63,12 +66,22 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     }
 
     loadingIsFailed = false;
+    lastException = null;
+    lastSt = null;
+    isLoading = true;
+    if (notifyStart) {
+      notifyListeners();
+    }
 
     ResultAndMeta<K> pair;
     try {
       pair = await repo.getList(params: _params);
-    } on Exception {
+    } on Exception catch(e, s) {
       loadingIsFailed = true;
+      lastException = e;
+      lastSt = s;
+      isLoading = false;
+      logger.e('get list error', e, s);
       notifyListeners();
       return null;
     }
@@ -79,6 +92,7 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     } else {
       _items.addAll(pair.result);
     }
+    isLoading = false;
     notifyListeners();
     return pair.result;
   }

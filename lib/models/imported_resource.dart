@@ -1,12 +1,12 @@
 import '../utils/base_model.dart';
 
 class ImportedResource extends BaseModel {
-  final String name;
-  final String description;
-  final bool isIgnored;
-  final DateTime createdAt;
-  final String type;
-  final Map<String, dynamic> typeSpecific;
+  String name;
+  String description;
+  bool isIgnored;
+  DateTime createdAt;
+  String type;
+  Map<String, dynamic> typeSpecific;
 
   ImportedResource({
     id,
@@ -17,4 +17,8 @@ class ImportedResource extends BaseModel {
     this.type,
     this.typeSpecific,
   }): super(id: id);
+
+  void update() {  // TODO: хуита
+    notifyListeners();
+  }
 }

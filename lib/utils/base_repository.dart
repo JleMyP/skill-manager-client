@@ -10,31 +10,29 @@ class ResultAndMeta<T> {
 
 
 abstract class BaseRestRepository<T> {
-  HttpApiClient _client;
+  HttpApiClient client;
   String resultKey;
 
   BaseRestRepository({this.resultKey});
-  BaseRestRepository.withClient(this._client, {this.resultKey});
+  BaseRestRepository.withClient(this.client, {this.resultKey});
 
   String get baseUrl;
   int get fakeListCount => 30;
-
-  set client(HttpApiClient client) => _client = client;
 
   Future<ResultAndMeta<T>> getList({Map<String, dynamic> params}) async {
     List<T> list;
     Map<String, dynamic> meta;
 
-    if (_client.fake) {
-      if (_client.netDelay != 0) {  // TODO: дублируется
-        await Future.delayed(Duration(seconds: _client.netDelay));
+    if (client.fake) {
+      if (client.netDelay != 0) {  // TODO: дублируется
+        await Future.delayed(Duration(seconds: client.netDelay));
       }
       list = [
         for (var i = 0; i < fakeListCount; i++)
           fakeItemForList(i)
       ];
     } else {
-      var response = await _client.get(baseUrl, params: params);
+      var response = await client.get(baseUrl, params: params);
       List<Map<String, dynamic>> rawList;
 
       if (resultKey != null) {
@@ -57,13 +55,13 @@ abstract class BaseRestRepository<T> {
   Future<T> getDetail(int itemId) async {
     T item;
 
-    if (_client.fake) {
-      if (_client.netDelay != 0) {
-        await Future.delayed(Duration(seconds: _client.netDelay));
+    if (client.fake) {
+      if (client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: client.netDelay));
       }
       item = fakeItemForDetail(itemId);
     } else {
-      var response = await _client.get('$baseUrl/$itemId/');
+      var response = await client.get('$baseUrl$itemId/');
       item = parseItemFromDetail(response);
     }
 
@@ -71,27 +69,34 @@ abstract class BaseRestRepository<T> {
   }
 
   Future<void> deleteItem(int itemId) async {
-    if (_client.fake) {
-      if (_client.netDelay != 0) {
-        await Future.delayed(Duration(seconds: _client.netDelay));
+    if (client.fake) {
+      if (client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: client.netDelay));
       }
     } else {
-      await _client.delete('$baseUrl/$itemId/');
+      await client.delete('$baseUrl$itemId/');
     }
   }
 
   Future<void> updateItem(int itemId, Map<String, dynamic> data) async {
-    if (_client.fake) {
-      if (_client.netDelay != 0) {
-        await Future.delayed(Duration(seconds: _client.netDelay));
+    if (client.fake) {
+      if (client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: client.netDelay));
       }
     } else {
-      await _client.patch('$baseUrl/$itemId/', data);
+      await client.patch('$baseUrl$itemId/', data);
     }
   }
 
   T parseItemFromList(Map<String, dynamic> item);
-  T parseItemFromDetail(Map<String, dynamic> item);
+
+  T parseItemFromDetail(Map<String, dynamic> item) {
+    return parseItemFromList(item);
+  }
+
   T fakeItemForList(int i);
-  T fakeItemForDetail(int i);
+
+  T fakeItemForDetail(int i) {
+    return fakeItemForList(i);
+  }
 }

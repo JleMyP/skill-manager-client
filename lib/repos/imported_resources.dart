@@ -23,11 +23,6 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
   }
 
   @override
-  ImportedResource parseItemFromDetail(Map<String, dynamic> item) {
-    return parseItemFromList(item);
-  }
-
-  @override
   ImportedResource fakeItemForList(int i) {
     return ImportedResource(
       id: i,
@@ -35,10 +30,5 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
       description: 'описание ресурса $i',
       isIgnored: i % 2 == 1,
     );
-  }
-
-  @override
-  ImportedResource fakeItemForDetail(int i) {
-    return fakeItemForList(i);
   }
 }
