@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logger_flutter/logger_flutter.dart';
 import 'package:provider/provider.dart';
@@ -7,31 +6,9 @@ import 'package:shrink_sidemenu/shrink_sidemenu.dart';
 
 import '../repos/user.dart';
 import '../utils/dialogs.dart';
+import '../utils/store.dart';
 import 'imported_resource_list.dart';
 
-
-class SelectedScreenStore with ChangeNotifier {
-  int _screen = 0;
-
-  int get screen => _screen;
-  set screen(int val) {
-    _screen = val;
-    notifyListeners();
-  }
-}
-
-
-class SelectedPageStore with ChangeNotifier {
-  String _page;
-
-  SelectedPageStore(this._page);
-
-  String get page => _page;
-  set page(String val) {
-    _page = val;
-    notifyListeners();
-  }
-}
 
 class HomePageWrapper extends StatelessWidget {
   @override
@@ -73,7 +50,7 @@ class HomePage extends StatelessWidget {
       background: Theme.of(context).dialogBackgroundColor,
       key: _sideMenuKey,
       type: SideMenuType.slideNRotate,
-      menu: LeftMenu(),
+      menu: LeftMenu(_sideMenuTap),
       child: body,
     );
   }
@@ -91,6 +68,10 @@ class HomePage extends StatelessWidget {
 
 
 class LeftMenu extends StatelessWidget {
+  final Function sideMenuTap;
+
+  LeftMenu(this.sideMenuTap);
+
   @override
   Widget build(BuildContext context) {
     var store = context.watch<SelectedPageStore>();
@@ -100,7 +81,10 @@ class LeftMenu extends StatelessWidget {
           selected: store.page == ImportedResourceListPage.name,
           leading: Icon(Icons.archive_outlined),
           title: Text('Импортированные ресурсы'),
-          onTap: () => store.page = ImportedResourceListPage.name,
+          onTap: () {
+            store.page = ImportedResourceListPage.name;
+            sideMenuTap();
+          },
         ),
         ListTile(
           leading: Icon(Icons.all_inbox),

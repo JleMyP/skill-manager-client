@@ -1,52 +1,53 @@
-import 'package:flutter/foundation.dart';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:provider/provider.dart';
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../models/imported_resource.dart';
 import '../repos/imported_resources.dart';
 import '../utils/dialogs.dart';
 import '../utils/paginators.dart';
-import 'home.dart';
+import '../utils/store.dart';
+import '../utils/widgets.dart';
 
 
-class ImportedResourceListPage extends StatelessWidget {
+class ImportedResourceListPage extends StatefulWidget {
   static const name = 'imported_resource_list_page';
 
   final Function sideMenuTap;
-  final GlobalKey bodyKey;
 
-  ImportedResourceListPage(this.sideMenuTap, this.bodyKey);
+  ImportedResourceListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
+
+  ImportedResourceListState createState() => ImportedResourceListState();
+}
+
+
+class ImportedResourceListState extends State<ImportedResourceListPage> {
+  SelectedScreenStore ss;
+
+  @override
+  void initState() {
+    super.initState();
+    ss = SelectedScreenStore();
+  }
 
   @override
   Widget build(BuildContext context) {
-    var repo = context.watch<ImportedResourceRepo>();
-
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<SelectedScreenStore>(
-          create: (context) => SelectedScreenStore(),
-        ),
-        ChangeNotifierProvider<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>(
-          create: (context) => LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>.withRepo(repo),
-        ),
-      ],
+    return ChangeNotifierProvider<SelectedScreenStore>.value(
+      value: ss,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Импортированные ресурсы'),
           leading: IconButton(
             icon: Icon(Icons.menu),
-            onPressed: sideMenuTap,
+            onPressed: widget.sideMenuTap,
           ),
         ),
         body: SafeArea(
-          child: Body(bodyKey),
+          child: Body(),
         ),
         bottomNavigationBar: ConvexBottomBar(),
-        floatingActionButton: FloatingButton(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }
@@ -54,8 +55,6 @@ class ImportedResourceListPage extends StatelessWidget {
 
 
 class Body extends StatefulWidget {
-  Body(Key key): super(key: key);
-
   @override
   BodyState createState() => BodyState();
 }
@@ -63,103 +62,68 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   int _prevScreen;
-  Widget github = SvgPicture.asset(
+  LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator;
+  final Widget _github = SvgPicture.asset(
     'assets/github-logo.svg',
     width: 30,
     alignment: Alignment.centerLeft,
     color: Colors.grey,
   );
 
+  @override
+  void initState() {
+    super.initState();
+    var repo = context.read<ImportedResourceRepo>();
+    paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>.withRepo(repo);
+    paginator.fetchNext(notifyStart: false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    var paginator = context.watch<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
     var screen = context.watch<SelectedScreenStore>().screen;
 
+    // TODO: хуита. а можно не перерисовываться без изменения экрана?
     if (screen != _prevScreen) {
-      _changeScreen(screen, paginator);
-      return Center(child: CircularProgressIndicator());
-    }
-
-    if (paginator.isEnd && (paginator.items?.isEmpty ?? true)) {
-      return Center(child: Text('ниче нету...'));
-    }
-
-    if (paginator.loadingIsFailed) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text('Шот не удалось...'),
-          RaisedButton(
-            child: Text('Повторить'),
-            onPressed: () {
-              paginator.loadingIsFailed = false;
-              setState(() {});
-            },
-          )
-        ],
-      );
-    }
-
-    return RefreshIndicator(
-      child: ListView.separated(
-        itemCount: paginator.items.length + (paginator.isEnd ? 0 : 1),
-        itemBuilder: _buildListItem,
-        separatorBuilder: (context, index) => Divider(),
-        shrinkWrap: true,
-      ),
-      onRefresh: _refresh,
-    );
-  }
-
-  Widget _buildListItem(BuildContext context, int index) {
-    var paginator = context.read<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
-    if (index == paginator.items.length && !paginator.isEnd) {
-      if (paginator.loadingIsFailed) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: 15, top: 10),
-          child: Column(
-            children: [
-              Text('Шот не удалось...'),
-              RaisedButton(
-                child: Text('Повторить'),
-                onPressed: () {
-                  paginator.loadingIsFailed = false;
-                  setState(() {});
-                },
-              )
-            ],
-          ),
-        );
+      if (screen == 0) {
+        paginator.setParams(null);
+      } else if (screen == 1) {
+        paginator.setParams({'is_ignored': true});
+      } else if (screen == 2) {
+        paginator.setParams({'is_ignored': false});
       }
 
-      _fetchNext(paginator);
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 15, top: 10),
-          child: CircularProgressIndicator(),
-        ),
-      );
+      _prevScreen = screen;
     }
 
+    return PaginatedListView(paginator, _buildListItem);
+  }
+
+  Widget _buildListItem(BuildContext context, dynamic _item) {
+    var item = _item as ImportedResource;
     final typeMap = <String, Widget>{
-      'ImportedResourceRepo': github,
+      'ImportedResourceRepo': _github,
     };
 
-    var item = paginator.items[index];
     return Slidable(
       actionPane: SlidableDrawerActionPane(),
-      child: ListTile(
-        leading: typeMap[item.type],
-        title: Text(item.name),
-        subtitle: Text(item.description ?? ''),
-        trailing: IconButton(
-          icon: Icon(item.isIgnored ? Icons.visibility_off : Icons.visibility),
-          color: Colors.grey,
-          onPressed: () async => await _changeIgnore(item),
+      child: ChangeNotifierProvider<ImportedResource>.value(
+        value: item,
+        child: Builder(
+          builder: (context) {
+            var changedItem = context.watch<ImportedResource>();
+            return ListTile(
+              leading: typeMap[changedItem.type],
+              title: Text(changedItem.name),
+              subtitle: Text(changedItem.description ?? ''),
+              trailing: IconButton(
+                icon: Icon(changedItem.isIgnored ? Icons.visibility_off : Icons.visibility),
+                color: Colors.grey,
+                onPressed: () => _changeIgnore(changedItem),
+              ),
+              onTap: () => _openItem(changedItem),
+            );
+          },
         ),
-        onTap: () async => await _openItem(item),
       ),
       actions: [
         IconSlideAction(
@@ -184,30 +148,6 @@ class BodyState extends State<Body> {
     );
   }
 
-  _changeScreen(int index, LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator) async {
-    if (index == 0) {
-      paginator.setParams(null);
-    } else if (index == 1) {
-      paginator.setParams({'is_ignored': true});
-    } else if (index == 2) {
-      paginator.setParams({'is_ignored': false});
-    } else {
-      return;
-    }
-
-    _prevScreen = index;
-    await _fetchNext(paginator);
-  }
-
-  _fetchNext(LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator) async {
-    await paginator.fetchNext();
-  }
-
-  Future _refresh() async {
-    var paginator = context.read<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
-    await _changeScreen(_prevScreen, paginator);
-  }
-
   _createResource(ImportedResource item) async {
     // await
   }
@@ -228,7 +168,6 @@ class BodyState extends State<Body> {
       return;
     }
 
-    var paginator = context.read<LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>>();
     await paginator.deleteItem(item);
   }
 
@@ -236,9 +175,9 @@ class BodyState extends State<Body> {
     var repo = context.read<ImportedResourceRepo>();
     await repo.updateItem(item.id, {'is_ignored': !item.isIgnored,
                                     'resourcetype': item.type});
-    // TODO: обновить пагинатор
     // TODO: отлов ошибок
-    // item.isIgnored = !item.isIgnored;
+    item.isIgnored = !item.isIgnored;
+    item.update();
   }
 }
 
@@ -267,16 +206,5 @@ class ConvexBottomBar extends StatelessWidget {
       return;
     }
     screen.screen = newIndex;
-  }
-}
-
-
-class FloatingButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(Icons.add),
-      onPressed: () {},
-    );
   }
 }
