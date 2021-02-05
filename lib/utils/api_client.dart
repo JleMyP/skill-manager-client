@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:dio_http_formatter/dio_http_formatter.dart';
 import 'package:fresh_dio/fresh_dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:logger/logger.dart';
-import 'package:logger_flutter/logger_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'logger.dart';
 
 
 class ApiException implements Exception {
@@ -43,14 +43,6 @@ class JwtTokenPair {
     expiresIn: accessExpire.millisecondsSinceEpoch ~/ 1000,
     tokenType: 'Token',
   );
-}
-
-class ExtendedLogOutput extends ConsoleOutput {
-  @override
-  void output(OutputEvent event) {
-    super.output(event);
-    LogConsole.add(event);
-  }
 }
 
 
@@ -141,14 +133,6 @@ class HttpApiClient {
     httpClient = Dio();
     _setBaseUrl();
 
-    var filter = ProductionFilter();
-    filter.level = Level.debug;  // TODO: настройка извне
-    var logger = Logger(
-      level: Level.debug,
-      output: ExtendedLogOutput(),
-      filter: filter,
-    );
-
     refresher = Fresh.oAuth2(
       tokenStorage: InMemoryTokenStorage(),  // TODO: shared preferences
       shouldRefresh: (response) {
@@ -162,6 +146,7 @@ class HttpApiClient {
       },
     );
     delayer = DelayInterceptor(netDelay);
+    var logger = createLogger();
 
     httpClient.interceptors.addAll([
       refresher,

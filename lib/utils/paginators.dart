@@ -1,9 +1,11 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
 
-import '../utils/base_model.dart';
-import '../utils/base_repository.dart';
+import 'base_model.dart';
+import 'base_repository.dart';
+import 'logger.dart';
 
 
 class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
@@ -14,9 +16,17 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
   bool loadingIsFailed = false;
   int limit = 25;
   int count;
+  dynamic lastException;
+  StackTrace lastSt;  Logger logger;
 
-  LimitOffsetPaginator();
-  LimitOffsetPaginator.withRepo(this.repo);
+  bool isLoading = false;
+
+  LimitOffsetPaginator() {
+    logger = createLogger();
+  }
+  LimitOffsetPaginator.withRepo(this.repo) {
+    logger = createLogger();
+  }
 
   UnmodifiableListView<K> get items => UnmodifiableListView(_items);
 
