@@ -7,7 +7,7 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
 
   ImportedResourceRepo(): super(resultKey: 'results');
   ImportedResourceRepo.withClient(client):
-        super.withClient(client, resultKey: 'results');
+    super.withClient(client, resultKey: 'results');
 
   @override
   ImportedResource parseItemFromList(Map<String, dynamic> item) {

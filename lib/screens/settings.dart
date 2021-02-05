@@ -84,9 +84,9 @@ class SettingsPageState extends State<SettingsPage> {
                   child: Text('HTTP'),
                 ),
                 DropdownMenuItem(
-                  value: 'HTTPS',
+                  value: 'https',
                   child: Text('HTTPS'),
-                )
+                ),
               ],
             ),
             TextFormField(

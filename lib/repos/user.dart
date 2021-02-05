@@ -4,7 +4,7 @@ import '../models/user.dart';
 import '../utils/api_client.dart';
 
 
-class UserRepo with ChangeNotifier {
+class UserRepo extends ChangeNotifier {
   HttpApiClient _client;
   User currentUser;
 

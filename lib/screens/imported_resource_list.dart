@@ -166,19 +166,19 @@ class BodyState extends State<Body> {
           caption: 'Создать \nресурс',
           color: Colors.green,
           icon: Icons.add,
-          onTap: () async => await _createResource(item),
+          onTap: () => _createResource(item),
         ),
         IconSlideAction(
           caption: 'Изменить',
           color: Colors.blue,
           icon: Icons.edit,
-          onTap: () async => await _editItem(item),
+          onTap: () => _editItem(item),
         ),
         IconSlideAction(
           caption: 'Удалить',
           color: Colors.red,
           icon: Icons.delete,
-          onTap: () async => await _deleteItem(item),
+          onTap: () => _deleteItem(item),
         ),
       ],
     );
@@ -218,8 +218,8 @@ class BodyState extends State<Body> {
     await Navigator.of(context).pushNamed('/imported_resource/view', arguments: detailed);
   }
 
-  _editItem(ImportedResource item) async {
-    await Navigator.of(context).pushNamed('/imported_resource/edit', arguments: item);
+  _editItem(ImportedResource item) {
+    Navigator.of(context).pushNamed('/imported_resource/edit', arguments: item);
   }
 
   _deleteItem(ImportedResource item) async {

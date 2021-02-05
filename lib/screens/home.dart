@@ -50,6 +50,7 @@ class HomePageWrapper extends StatelessWidget {
   }
 }
 
+
 class HomePage extends StatelessWidget {
   final _sideMenuKey = GlobalKey<SideMenuState>();
   final _bodyKeys = <String, GlobalKey>{};
