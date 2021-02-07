@@ -74,12 +74,10 @@ packages:
   dio_http_formatter:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "20c27fcae9b72553997f29450bce559fc37630eb"
-      url: "https://github.com/JleMyP/dio_http_formatter.git"
-    source: git
-    version: "1.0.2"
+      name: dio_http_formatter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   effective_dart:
     dependency: "direct dev"
     description:

@@ -31,7 +31,9 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     List<Widget> actions;
     if (_isLoading) {
-      actions = [Center(child: CircularProgressIndicator())];
+      actions = [
+        Center(child: CircularProgressIndicator()),
+      ];
     } else {
       actions = [
         RaisedButton(

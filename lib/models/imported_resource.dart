@@ -1,5 +1,6 @@
 import '../utils/base_model.dart';
 
+
 class ImportedResource extends BaseModel {
   String name;
   String description;
@@ -18,7 +19,10 @@ class ImportedResource extends BaseModel {
     this.typeSpecific,
   }): super(id: id);
 
-  void update() {  // TODO: хуита
-    notifyListeners();
+  void update({bool isIgnored}) {
+    if (this.isIgnored != isIgnored) {
+      this.isIgnored = isIgnored;
+      notifyListeners();
+    }
   }
 }

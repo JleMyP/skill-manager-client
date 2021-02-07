@@ -41,7 +41,10 @@ class Tag extends BaseModel {
     this.values,
   }): super(id: id);
 
-  void update() {  // TODO: хуита
-    notifyListeners();
+  void update({bool like}) {
+    if (this.like != like) {
+      this.like = like;
+      notifyListeners();
+    }
   }
 }

@@ -29,11 +29,11 @@ dependencies:
   jwt_decoder: ^1.0.3
   dio: ^3.0.10
   fresh_dio: ^0.2.0
-  # logger_flutter: ^0.7.1
   logger: ^0.9.4
+  # logger_flutter: ^0.7.1
   logger_flutter:
     git: https://github.com/ewertonrp/logger_flutter.git
-  dio_http_formatter: ^1.0.2
+  dio_http_formatter: ^1.0.3
   convex_bottom_bar: ^2.6.0
   shrink_sidemenu: ^1.0.0
   flutter_slidable: ^0.5.4

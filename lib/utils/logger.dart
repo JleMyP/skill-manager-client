@@ -11,13 +11,8 @@ class ExtendedLogOutput extends ConsoleOutput {
 }
 
 
-Logger createLogger() {
-  var filter = ProductionFilter();
-  filter.level = Level.debug;  // TODO: настройка извне
-  var logger = Logger(
-    level: Level.debug,
-    output: ExtendedLogOutput(),
-    filter: filter,
-  );
-   return logger;
-}
+Logger createLogger() => Logger(
+  level: Level.debug,  // TODO: настройка извне
+  output: ExtendedLogOutput(),
+  filter: ProductionFilter(),
+);

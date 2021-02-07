@@ -57,7 +57,7 @@ class TagRepo extends BaseRestRepository<Tag> {
           icon: 'V',
           isDefault: true,
         ),
-      ]
+      ],
     );
   }
 
@@ -70,15 +70,15 @@ class TagRepo extends BaseRestRepository<Tag> {
     if (client.fake) {
       if (client.netDelay != 0) {
         await Future.delayed(Duration(seconds: client.netDelay));
-        return TagValue(
-          id: 1,
-          name: name,
-          orderNum: orderNum,
-          icon: icon,
-          isDefault: false,
-          createdAt: DateTime.now(),
-        );
       }
+      return TagValue(
+        id: 1,
+        name: name,
+        orderNum: orderNum,
+        icon: icon,
+        isDefault: false,
+        createdAt: DateTime.now(),
+      );
     } else {
       var data = {
         'name': name,

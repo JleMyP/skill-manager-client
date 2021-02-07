@@ -19,6 +19,7 @@ class ImportedResourceListPage extends StatefulWidget {
 
   ImportedResourceListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
+  @override
   ImportedResourceListState createState() => ImportedResourceListState();
 }
 
@@ -176,8 +177,7 @@ class BodyState extends State<Body> {
     await repo.updateItem(item.id, {'is_ignored': !item.isIgnored,
                                     'resourcetype': item.type});
     // TODO: отлов ошибок
-    item.isIgnored = !item.isIgnored;
-    item.update();
+    item.update(isIgnored: !item.isIgnored);
   }
 }
 

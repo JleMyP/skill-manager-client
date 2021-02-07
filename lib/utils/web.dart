@@ -6,7 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 // https://pub.dev/packages/flutter_inappwebview/example
 // или launch(url, forceWebView: true)
 
-openWeb(BuildContext context, String url) {
+void openWeb(BuildContext context, String url) {
   Navigator.of(context).push(
     MaterialPageRoute(builder: (_) => Scaffold(
       appBar: AppBar(

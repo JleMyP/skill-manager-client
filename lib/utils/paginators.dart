@@ -13,14 +13,13 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
   T repo;
   Map<String, dynamic> _params;
   List<K> _items;
+
+  bool isLoading = false;
   bool loadingIsFailed = false;
   int limit = 25;
   int count;
-  dynamic lastException;
-  StackTrace lastSt;
+  Exception lastException;
   Logger logger;
-
-  bool isLoading = false;
 
   LimitOffsetPaginator() {
     logger = createLogger();
@@ -51,7 +50,6 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     count = null;
     loadingIsFailed = false;
     lastException = null;
-    lastSt = null;
     isLoading = false;
   }
 
@@ -67,7 +65,6 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
 
     loadingIsFailed = false;
     lastException = null;
-    lastSt = null;
     isLoading = true;
     if (notifyStart) {
       notifyListeners();
@@ -79,7 +76,6 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     } on Exception catch(e, s) {
       loadingIsFailed = true;
       lastException = e;
-      lastSt = s;
       isLoading = false;
       logger.e('get list error', e, s);
       notifyListeners();

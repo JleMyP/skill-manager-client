@@ -18,6 +18,7 @@ class TagListPage extends StatefulWidget {
 
   TagListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
+  @override
   TagListState createState() => TagListState();
 }
 
@@ -142,8 +143,7 @@ class BodyState extends State<Body> {
     var repo = context.read<TagRepo>();
     await repo.updateItem(item.id, {'like': !item.like});
     // TODO: отлов ошибок
-    item.like = !item.like;
-    item.update();
+    item.update(like: !item.like);
   }
 
   _openItem(Tag item) async {
