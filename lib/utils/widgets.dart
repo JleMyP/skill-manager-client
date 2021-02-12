@@ -95,34 +95,35 @@ class PaginatedListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<LimitOffsetPaginator>.value(
       value: paginator,
-      child: Builder(builder: (context) {
-        context.watch<LimitOffsetPaginator>();
-        if (paginator.isEnd && (paginator.items?.isEmpty ?? true)) {
-          return EmptyBody();
-        }
-
-        if (paginator.loadingIsFailed) {
-          return RetryBody(paginator.fetchNext);
-        }
-
-        if (paginator.count == null) {
-          if (!paginator.isLoading) {
-            paginator.fetchNext(notifyStart: false);
+      child: Consumer<LimitOffsetPaginator>(
+        builder: (context, _paginator, child) {
+          if (paginator.isEnd && (paginator.items?.isEmpty ?? true)) {
+            return EmptyBody();
           }
-          return BodyLoading();
-        }
 
-        return RefreshIndicator(
-          child: ListView.separated(
-            controller: scrollController,
-            itemCount: paginator.items.length + (paginator.isEnd ? 0 : 1),
-            itemBuilder: _itemBuilder,
-            separatorBuilder: (context, index) => Divider(),
-            shrinkWrap: true,
-          ),
-          onRefresh: _refresh,
-        );
-      })
+          if (paginator.loadingIsFailed) {
+            return RetryBody(paginator.fetchNext);
+          }
+
+          if (paginator.count == null) {
+            if (!paginator.isLoading) {
+              paginator.fetchNext(notifyStart: false);
+            }
+            return BodyLoading();
+          }
+
+          return RefreshIndicator(
+            child: ListView.separated(
+              controller: scrollController,
+              itemCount: paginator.items.length + (paginator.isEnd ? 0 : 1),
+              itemBuilder: _itemBuilder,
+              separatorBuilder: (context, index) => Divider(),
+              shrinkWrap: true,
+            ),
+            onRefresh: _refresh,
+          );
+        },
+      ),
     );
   }
 

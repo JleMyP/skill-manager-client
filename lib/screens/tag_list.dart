@@ -36,8 +36,9 @@ class TagListState extends State<TagListPage> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ButtonState>.value(
       value: bs,
-      child: Builder(
-        builder: (context) => Scaffold(
+      child: Consumer<ButtonState>(
+        child: Body(),
+        builder: (context, _bs, child) => Scaffold(
           appBar: AppBar(
             title: Text('Метки'),
             leading: IconButton(
@@ -46,12 +47,12 @@ class TagListState extends State<TagListPage> {
             ),
           ),
           body: SafeArea(
-            child: Body(),
+            child: child,
           ),
           endDrawer: Drawer(
             child: TagFilter(),
           ),
-          floatingActionButton: context.watch<ButtonState>().show ? FloatingButton() : null,
+          floatingActionButton: _bs.show ? FloatingButton() : null,
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ),
       ),
@@ -97,19 +98,16 @@ class BodyState extends State<Body> {
       actionPane: SlidableDrawerActionPane(),
       child: ChangeNotifierProvider<Tag>.value(
         value: item,
-        child: Builder(
-          builder: (context) {
-            var changedItem = context.watch<Tag>();
-            return ListTile(
-              leading: changedItem.icon != null ? Text(changedItem.icon) : null,
-              title: Text(changedItem.name),
-              trailing: IconButton(
-                icon: changedItem.like ? Icon(Icons.favorite, color: Colors.red) : Icon(Icons.favorite_border),
-                onPressed: () async => await _changeLike(changedItem),
-              ),
-              onTap: () async => await _openItem(changedItem),
-            );
-          },
+        child: Consumer<Tag>(
+          builder: (context, changedItem, child) => ListTile(
+            leading: changedItem.icon != null ? Text(changedItem.icon) : null,
+            title: Text(changedItem.name),
+            trailing: IconButton(
+              icon: changedItem.like ? Icon(Icons.favorite, color: Colors.red) : Icon(Icons.favorite_border),
+              onPressed: () async => await _changeLike(changedItem),
+            ),
+            onTap: () async => await _openItem(changedItem),
+          ),
         ),
       ),
       actions: [

@@ -131,21 +131,18 @@ class BodyState extends State<Body> {
       actionPane: SlidableDrawerActionPane(),
       child: ChangeNotifierProvider<ImportedResource>.value(
         value: item,
-        child: Builder(
-          builder: (context) {
-            var changedItem = context.watch<ImportedResource>();
-            return ListTile(
-              leading: typeMap[changedItem.type],
-              title: Text(changedItem.name),
-              subtitle: Text(changedItem.description ?? ''),
-              trailing: IconButton(
-                icon: Icon(changedItem.isIgnored ? Icons.visibility_off : Icons.visibility),
-                color: Colors.grey,
-                onPressed: () => _changeIgnore(changedItem),
-              ),
-              onTap: () => _openItem(changedItem),
-            );
-          },
+        child: Consumer<ImportedResource>(
+          builder: (context, changedItem, child) => ListTile(
+            leading: typeMap[changedItem.type],
+            title: Text(changedItem.name),
+            subtitle: Text(changedItem.description ?? ''),
+            trailing: IconButton(
+              icon: Icon(changedItem.isIgnored ? Icons.visibility_off : Icons.visibility),
+              color: Colors.grey,
+              onPressed: () => _changeIgnore(changedItem),
+            ),
+            onTap: () => _openItem(changedItem),
+          ),
         ),
       ),
       actions: [
