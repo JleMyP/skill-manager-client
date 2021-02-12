@@ -31,4 +31,10 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
       isIgnored: i % 2 == 1,
     );
   }
+
+  @override
+  Future<ImportedResource> updateItem(ImportedResource item, Map<String, dynamic> data) async {
+    data['resourcetype'] = item.type;
+    return await super.updateItem(item, data);
+  }
 }

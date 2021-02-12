@@ -155,7 +155,7 @@ class BodyState extends State<Body> {
 
   _openItem(ImportedResource item) async {
     var repo = context.read<ImportedResourceRepo>();
-    var detailed = await repo.getDetail(item.id);
+    var detailed = await repo.getDetail(item);
     await Navigator.of(context).pushNamed('/imported_resource/view', arguments: detailed);
   }
 
@@ -174,8 +174,7 @@ class BodyState extends State<Body> {
 
   _changeIgnore(ImportedResource item) async {
     var repo = context.read<ImportedResourceRepo>();
-    await repo.updateItem(item.id, {'is_ignored': !item.isIgnored,
-                                    'resourcetype': item.type});
+    await repo.updateItem(item, {'is_ignored': !item.isIgnored});
     // TODO: отлов ошибок
     item.update(isIgnored: !item.isIgnored);
   }

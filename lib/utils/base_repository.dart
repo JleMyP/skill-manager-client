@@ -1,4 +1,5 @@
-import '../utils/api_client.dart';
+import 'api_client.dart';
+import 'base_model.dart';
 
 
 class ResultAndMeta<T> {
@@ -9,7 +10,7 @@ class ResultAndMeta<T> {
 }
 
 
-abstract class BaseRestRepository<T> {
+abstract class BaseRestRepository<T extends BaseModel> {
   HttpApiClient client;
   String resultKey;
 
@@ -52,7 +53,7 @@ abstract class BaseRestRepository<T> {
     return ResultAndMeta<T>(list, meta);
   }
 
-  Future<T> getDetail(int itemId) async {
+  Future<T> getDetailById(int itemId) async {
     T item;
 
     if (client.fake) {
@@ -68,7 +69,23 @@ abstract class BaseRestRepository<T> {
     return item;
   }
 
-  Future<void> deleteItem(int itemId) async {
+  Future<T> getDetail(T item) async {
+    T item;
+
+    if (client.fake) {
+      if (client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: client.netDelay));
+      }
+      item = fakeItemForDetail(item.id);
+    } else {
+      var response = await client.get('$baseUrl${item.id}/');
+      item = parseItemFromDetail(response);
+    }
+
+    return item;
+  }
+
+  Future<void> deleteItemById(int itemId) async {
     if (client.fake) {
       if (client.netDelay != 0) {
         await Future.delayed(Duration(seconds: client.netDelay));
@@ -78,14 +95,46 @@ abstract class BaseRestRepository<T> {
     }
   }
 
-  Future<void> updateItem(int itemId, Map<String, dynamic> data) async {
+  Future<void> deleteItem(T item) async {
     if (client.fake) {
       if (client.netDelay != 0) {
         await Future.delayed(Duration(seconds: client.netDelay));
       }
     } else {
-      await client.patch('$baseUrl$itemId/', data);
+      await client.delete('$baseUrl${item.id}/');
     }
+  }
+
+  Future<T> updateItemById(int itemId, Map<String, dynamic> data) async {
+    T newItem;
+
+    if (client.fake) {
+      if (client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: client.netDelay));
+        newItem = fakeItemForDetail(itemId);
+      }
+    } else {
+      var response = await client.patch('$baseUrl$itemId/', data);
+      newItem = parseItemFromDetail(response);
+    }
+
+    return newItem;
+  }
+
+  Future<T> updateItem(T item, Map<String, dynamic> data) async {
+    T newItem;
+
+    if (client.fake) {
+      if (client.netDelay != 0) {
+        await Future.delayed(Duration(seconds: client.netDelay));
+        newItem = fakeItemForDetail(item.id);
+      }
+    } else {
+      var response = await client.patch('$baseUrl${item.id}/', data);
+      newItem = parseItemFromDetail(response);
+    }
+
+    return newItem;
   }
 
   T parseItemFromList(Map<String, dynamic> item);

@@ -141,14 +141,14 @@ class BodyState extends State<Body> {
 
   _changeLike(Tag item) async {
     var repo = context.read<TagRepo>();
-    await repo.updateItem(item.id, {'like': !item.like});
+    await repo.updateItem(item, {'like': !item.like});
     // TODO: отлов ошибок
     item.update(like: !item.like);
   }
 
   _openItem(Tag item) async {
     var repo = context.read<TagRepo>();
-    var detailed = await repo.getDetail(item.id);
+    var detailed = await repo.getDetail(item);
     // await Navigator.of(context).pushNamed('/tag/view', arguments: detailed);
   }
 

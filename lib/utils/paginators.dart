@@ -94,7 +94,7 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
   }
 
   Future<void> deleteItem(K item) async {
-    await repo.deleteItem(item.id);
+    await repo.deleteItem(item);
     _items.remove(item);
     count -= 1;
     notifyListeners();
