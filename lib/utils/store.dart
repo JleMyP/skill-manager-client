@@ -34,3 +34,14 @@ class ButtonState extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+
+class BottomBarState extends ChangeNotifier {
+  bool _show = true;
+
+  bool get show => _show;
+  set show(bool val) {
+    _show = val;
+    notifyListeners();
+  }
+}

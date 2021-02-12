@@ -1,5 +1,6 @@
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -25,30 +26,42 @@ class ImportedResourceListPage extends StatefulWidget {
 
 
 class ImportedResourceListState extends State<ImportedResourceListPage> {
-  SelectedScreenStore ss;
+  SelectedScreenStore _screenStore;
+  BottomBarState _barState;
 
   @override
   void initState() {
     super.initState();
-    ss = SelectedScreenStore();
+    _screenStore = SelectedScreenStore();
+    _barState = BottomBarState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SelectedScreenStore>.value(
-      value: ss,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Импортированные ресурсы'),
-          leading: IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: widget.sideMenuTap,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<SelectedScreenStore>.value(
+          value: _screenStore,
+        ),
+        ChangeNotifierProvider<BottomBarState>.value(
+          value: _barState,
+        ),
+      ],
+      child: Consumer<BottomBarState>(
+        child: Body(),
+        builder: (context, bs, child) => Scaffold(
+          appBar: AppBar(
+            title: Text('Импортированные ресурсы'),
+            leading: IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: widget.sideMenuTap,
+            ),
           ),
+          body: SafeArea(
+            child: child,
+          ),
+          bottomNavigationBar: bs.show ? ConvexBottomBar() : null,
         ),
-        body: SafeArea(
-          child: Body(),
-        ),
-        bottomNavigationBar: ConvexBottomBar(),
       ),
     );
   }
@@ -63,7 +76,9 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   int _prevScreen;
-  LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> paginator;
+  LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> _paginator;
+
+  final ScrollController _scrollController = ScrollController();
   final Widget _github = SvgPicture.asset(
     'assets/github-logo.svg',
     width: 30,
@@ -74,9 +89,16 @@ class BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScroll);
     var repo = context.read<ImportedResourceRepo>();
-    paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>.withRepo(repo);
-    paginator.fetchNext(notifyStart: false);
+    _paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>.withRepo(repo);
+    _paginator.fetchNext(notifyStart: false);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_handleScroll);
+    super.dispose();
   }
 
   @override
@@ -86,17 +108,17 @@ class BodyState extends State<Body> {
     // TODO: хуита. а можно не перерисовываться без изменения экрана?
     if (screen != _prevScreen) {
       if (screen == 0) {
-        paginator.setParams(null);
+        _paginator.setParams(null);
       } else if (screen == 1) {
-        paginator.setParams({'is_ignored': true});
+        _paginator.setParams({'is_ignored': true});
       } else if (screen == 2) {
-        paginator.setParams({'is_ignored': false});
+        _paginator.setParams({'is_ignored': false});
       }
 
       _prevScreen = screen;
     }
 
-    return PaginatedListView(paginator, _buildListItem);
+    return PaginatedListView(_paginator, _buildListItem, _scrollController);
   }
 
   Widget _buildListItem(BuildContext context, dynamic _item) {
@@ -149,6 +171,16 @@ class BodyState extends State<Body> {
     );
   }
 
+  _handleScroll() {
+    var buttonState = context.read<BottomBarState>();
+
+    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+      buttonState.show = false;
+    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+      buttonState.show = true;
+    }
+  }
+
   _createResource(ImportedResource item) async {
     // await
   }
@@ -169,7 +201,7 @@ class BodyState extends State<Body> {
       return;
     }
 
-    await paginator.deleteItem(item);
+    await _paginator.deleteItem(item);
   }
 
   _changeIgnore(ImportedResource item) async {
