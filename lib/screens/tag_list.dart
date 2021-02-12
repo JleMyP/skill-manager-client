@@ -40,9 +40,9 @@ class TagListState extends State<TagListPage> {
         child: Body(),
         builder: (context, _bs, child) => Scaffold(
           appBar: AppBar(
-            title: Text('Метки'),
+            title: const Text('Метки'),
             leading: IconButton(
-              icon: Icon(Icons.menu),
+              icon: const Icon(Icons.menu),
               onPressed: widget.sideMenuTap,
             ),
           ),
@@ -75,7 +75,7 @@ class BodyState extends State<Body> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
-    var repo = context.read<TagRepo>();
+    final repo = context.read<TagRepo>();
     paginator = LimitOffsetPaginator<TagRepo, Tag>.withRepo(repo);
     paginator.fetchNext(notifyStart: false);
   }
@@ -92,7 +92,7 @@ class BodyState extends State<Body> {
   }
 
   Widget _buildListItem(BuildContext context, dynamic _item) {
-    var item = _item as Tag;
+    final item = _item as Tag;
 
     return Slidable(
       actionPane: SlidableDrawerActionPane(),
@@ -103,7 +103,8 @@ class BodyState extends State<Body> {
             leading: changedItem.icon != null ? Text(changedItem.icon) : null,
             title: Text(changedItem.name),
             trailing: IconButton(
-              icon: changedItem.like ? Icon(Icons.favorite, color: Colors.red) : Icon(Icons.favorite_border),
+              icon: changedItem.like ? const Icon(Icons.favorite, color: Colors.red)
+                  : const Icon(Icons.favorite_border),
               onPressed: () async => await _changeLike(changedItem),
             ),
             onTap: () async => await _openItem(changedItem),
@@ -128,7 +129,7 @@ class BodyState extends State<Body> {
   }
 
   _handleScroll() {
-    var buttonState = context.read<ButtonState>();
+    final buttonState = context.read<ButtonState>();
 
     if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       buttonState.show = false;
@@ -138,15 +139,15 @@ class BodyState extends State<Body> {
   }
 
   _changeLike(Tag item) async {
-    var repo = context.read<TagRepo>();
+    final repo = context.read<TagRepo>();
     await repo.updateItem(item, {'like': !item.like});
     // TODO: отлов ошибок
     item.update(like: !item.like);
   }
 
   _openItem(Tag item) async {
-    var repo = context.read<TagRepo>();
-    var detailed = await repo.getDetail(item);
+    final repo = context.read<TagRepo>();
+    final detailed = await repo.getDetail(item);
     // await Navigator.of(context).pushNamed('/tag/view', arguments: detailed);
   }
 
@@ -155,7 +156,7 @@ class BodyState extends State<Body> {
   }
 
   _deleteItem(Tag item) async {
-    var confirm = await showConfirmDialog(context, 'Удалить метку?', item.name);
+    final confirm = await showConfirmDialog(context, 'Удалить метку?', item.name);
 
     if (!confirm) {
       return;
@@ -209,7 +210,7 @@ class TagFilterState extends State<TagFilter> {
               ],
             ),
             RaisedButton(
-              child: Text('Сохранить'),
+              child: const Text('Сохранить'),
               onPressed: () {},
             ),
           ],
@@ -222,10 +223,8 @@ class TagFilterState extends State<TagFilter> {
 
 class FloatingButton extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(Icons.add),
-      onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
-    );
-  }
+  Widget build(BuildContext context) => FloatingActionButton(
+    child: const Icon(Icons.add),
+    onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
+  );
 }

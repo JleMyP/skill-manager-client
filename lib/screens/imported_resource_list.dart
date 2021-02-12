@@ -51,9 +51,9 @@ class ImportedResourceListState extends State<ImportedResourceListPage> {
         child: Body(),
         builder: (context, bs, child) => Scaffold(
           appBar: AppBar(
-            title: Text('Импортированные ресурсы'),
+            title: const Text('Импортированные ресурсы'),
             leading: IconButton(
-              icon: Icon(Icons.menu),
+              icon: const Icon(Icons.menu),
               onPressed: widget.sideMenuTap,
             ),
           ),
@@ -90,9 +90,9 @@ class BodyState extends State<Body> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
-    var repo = context.read<ImportedResourceRepo>();
-    _paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>.withRepo(repo);
-    _paginator.fetchNext(notifyStart: false);
+    final repo = context.read<ImportedResourceRepo>();
+    _paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>
+        .withRepo(repo)..fetchNext(notifyStart: false);
   }
 
   @override
@@ -103,7 +103,7 @@ class BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
-    var screen = context.watch<SelectedScreenStore>().screen;
+    final screen = context.watch<SelectedScreenStore>().screen;
 
     // TODO: хуита. а можно не перерисовываться без изменения экрана?
     if (screen != _prevScreen) {
@@ -122,7 +122,7 @@ class BodyState extends State<Body> {
   }
 
   Widget _buildListItem(BuildContext context, dynamic _item) {
-    var item = _item as ImportedResource;
+    final item = _item as ImportedResource;
     final typeMap = <String, Widget>{
       'ImportedResourceRepo': _github,
     };
@@ -169,7 +169,7 @@ class BodyState extends State<Body> {
   }
 
   _handleScroll() {
-    var buttonState = context.read<BottomBarState>();
+    final buttonState = context.read<BottomBarState>();
 
     if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       buttonState.show = false;
@@ -183,8 +183,8 @@ class BodyState extends State<Body> {
   }
 
   _openItem(ImportedResource item) async {
-    var repo = context.read<ImportedResourceRepo>();
-    var detailed = await repo.getDetail(item);
+    final repo = context.read<ImportedResourceRepo>();
+    final detailed = await repo.getDetail(item);
     await Navigator.of(context).pushNamed('/imported_resource/view', arguments: detailed);
   }
 
@@ -193,7 +193,7 @@ class BodyState extends State<Body> {
   }
 
   _deleteItem(ImportedResource item) async {
-    var confirm = await showConfirmDialog(context, 'Удалить импортированный ресурс?', item.name);
+    final confirm = await showConfirmDialog(context, 'Удалить импортированный ресурс?', item.name);
     if (!confirm) {
       return;
     }
@@ -202,7 +202,7 @@ class BodyState extends State<Body> {
   }
 
   _changeIgnore(ImportedResource item) async {
-    var repo = context.read<ImportedResourceRepo>();
+    final repo = context.read<ImportedResourceRepo>();
     await repo.updateItem(item, {'is_ignored': !item.isIgnored});
     // TODO: отлов ошибок
     item.update(isIgnored: !item.isIgnored);
@@ -221,9 +221,9 @@ class ConvexBottomBar extends StatelessWidget {
       backgroundColor: theme.primaryColor,
       color: theme.backgroundColor,
       items: [
-        TabItem(icon: Icons.home, title: 'Все'),
-        TabItem(icon: Icons.visibility_off, title: 'Игнор'),
-        TabItem(icon: Icons.visibility, title: 'Не игнор'),
+        const TabItem(icon: Icons.home, title: 'Все'),
+        const TabItem(icon: Icons.visibility_off, title: 'Игнор'),
+        const TabItem(icon: Icons.visibility, title: 'Не игнор'),
       ],
       onTap: (i) => _onItemTapped(screen, i),
     );

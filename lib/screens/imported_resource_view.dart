@@ -37,19 +37,19 @@ class ImportedResourceViewPage extends StatelessWidget {
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: _ignore,
-                child: Text('Заигнорить'),
+                child: const Text('Заигнорить'),
               ),
               PopupMenuItem(
                 value: _unignore,
-                child: Text('Разигнорить'),
+                child: const Text('Разигнорить'),
               ),
               PopupMenuItem(
                 value: _createResource,
-                child: Text('Создать ресурс'),
+                child: const Text('Создать ресурс'),
               ),
               PopupMenuItem(
                 value: _delete,
-                child: Text('Удалить'),
+                child: const Text('Удалить'),
               ),
             ],
           ),

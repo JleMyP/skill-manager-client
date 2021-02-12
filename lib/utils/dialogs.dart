@@ -10,13 +10,14 @@ Future<void> showSimpleDialog(BuildContext parentContext, String title,
       content: Text(content),
       actions: [
         FlatButton(
-          child: Text('ОК'),
+          child: const Text('ОК'),
           onPressed: () => Navigator.of(parentContext).pop(),
         ),
       ],
     ),
   );
 }
+
 
 Future<bool> showConfirmDialog(BuildContext parentContext, String title,
     String content) async {
@@ -27,11 +28,11 @@ Future<bool> showConfirmDialog(BuildContext parentContext, String title,
       content: content != null ? Text(content) : null,
       actions: [
         FlatButton(
-          child: Text('Нет'),
+          child: const Text('Нет'),
           onPressed: () => Navigator.of(parentContext).pop(false),
         ),
         FlatButton(
-          child: Text('Да'),
+          child: const Text('Да'),
           onPressed: () => Navigator.of(parentContext).pop(true),
         ),
       ],

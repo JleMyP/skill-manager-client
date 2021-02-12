@@ -35,10 +35,10 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var page = context.watch<SelectedPageStore>().page;
+    final page = context.watch<SelectedPageStore>().page;
 
     _bodyKeys.putIfAbsent(page, () => GlobalKey());
-    var state = _bodyKeys[page];
+    final state = _bodyKeys[page];
 
     Widget body;
     switch (page) {
@@ -60,7 +60,7 @@ class HomePage extends StatelessWidget {
   }
 
   _sideMenuTap() {
-    var state = _sideMenuKey.currentState;
+    final state = _sideMenuKey.currentState;
 
     if (state.isOpened) {
       state.closeSideMenu();
@@ -83,65 +83,65 @@ class LeftMenu extends StatelessWidget {
       children: [
         ListTile(
           selected: store.page == ImportedResourceListPage.name,
-          leading: Icon(Icons.archive_outlined),
-          title: Text('Импортированные ресурсы'),
+          leading: const Icon(Icons.archive_outlined),
+          title: const Text('Импортированные ресурсы'),
           onTap: () {
             store.page = ImportedResourceListPage.name;
             sideMenuTap();
           },
         ),
         ListTile(
-          leading: Icon(Icons.all_inbox),
-          title: Text('Ресурсы'),
+          leading: const Icon(Icons.all_inbox),
+          title: const Text('Ресурсы'),
           onTap: () {},
         ),
         ListTile(
-          leading: Icon(Icons.school_outlined),
-          title: Text('ЗУНы'),
+          leading: const Icon(Icons.school_outlined),
+          title: const Text('ЗУНы'),
           onTap: () {},
         ),
         ListTile(
-          leading: Icon(Icons.assignment_outlined),
-          title: Text('Задачи'),
+          leading: const Icon(Icons.assignment_outlined),
+          title: const Text('Задачи'),
           onTap: () {},
         ),
         ListTile(
-          leading: Icon(Icons.notes),
-          title: Text('Заметки'),
+          leading: const Icon(Icons.notes),
+          title: const Text('Заметки'),
           onTap: () {},
         ),
         ListTile(
-          leading: Icon(Icons.calendar_today),
-          title: Text('Напоминания'),
+          leading: const Icon(Icons.calendar_today),
+          title: const Text('Напоминания'),
           onTap: () {},
         ),
         ListTile(
-          leading: Icon(Icons.work_outline),
-          title: Text('Проекты'),
+          leading: const Icon(Icons.work_outline),
+          title: const Text('Проекты'),
           onTap: () {},
         ),
-        Divider(height: 5),
+        const Divider(height: 5),
         ListTile(
           selected: store.page == TagListPage.name,
-          leading: Icon(Icons.label),
-          title: Text('Метки'),
+          leading: const Icon(Icons.label),
+          title: const Text('Метки'),
           onTap: () {
             store.page = TagListPage.name;
             sideMenuTap();
           },
         ),
-        Divider(height: 50),
+        const Divider(height: 50),
         // TODO: не рендерить консольку в release mode или по флагам
         ListTile(
-          leading: Icon(Icons.insert_drive_file),
-          title: Text('Логи'),
+          leading: const Icon(Icons.insert_drive_file),
+          title: const Text('Логи'),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => LogConsole(dark: true, showCloseButton: true),
           )),
         ),
         ListTile(
-          leading: Icon(Icons.logout),
-          title: Text('Выход'),
+          leading: const Icon(Icons.logout),
+          title: const Text('Выход'),
           onTap: () => _logout(context),
         ),
       ],
@@ -149,10 +149,10 @@ class LeftMenu extends StatelessWidget {
   }
 
   _logout(BuildContext context) async {
-    var sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.remove('auth:login');
-    sharedPreferences.remove('auth:password');
-    sharedPreferences.remove('auth:autoLogin');
+    await SharedPreferences.getInstance()
+      ..remove('auth:login')
+      ..remove('auth:password')
+      ..remove('auth:autoLogin');
     context.read<UserRepo>().logout();
     Navigator.of(context).pushReplacementNamed('/login');
   }

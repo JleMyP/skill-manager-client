@@ -33,7 +33,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
           fakeItemForList(i)
       ];
     } else {
-      var response = await client.get(baseUrl, params: params);
+      final response = await client.get(baseUrl, params: params);
       List<Map<String, dynamic>> rawList;
 
       if (resultKey != null) {
@@ -62,7 +62,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
       }
       item = fakeItemForDetail(itemId);
     } else {
-      var response = await client.get('$baseUrl$itemId/');
+      final response = await client.get('$baseUrl$itemId/');
       item = parseItemFromDetail(response);
     }
 
@@ -78,7 +78,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
       }
       item = fakeItemForDetail(item.id);
     } else {
-      var response = await client.get('$baseUrl${item.id}/');
+      final response = await client.get('$baseUrl${item.id}/');
       item = parseItemFromDetail(response);
     }
 
@@ -114,7 +114,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
         newItem = fakeItemForDetail(itemId);
       }
     } else {
-      var response = await client.patch('$baseUrl$itemId/', data);
+      final response = await client.patch('$baseUrl$itemId/', data);
       newItem = parseItemFromDetail(response);
     }
 
@@ -130,7 +130,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
         newItem = fakeItemForDetail(item.id);
       }
     } else {
-      var response = await client.patch('$baseUrl${item.id}/', data);
+      final response = await client.patch('$baseUrl${item.id}/', data);
       newItem = parseItemFromDetail(response);
     }
 

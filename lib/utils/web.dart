@@ -13,7 +13,7 @@ void openWeb(BuildContext context, String url) {
         title: Text(url),
         actions: [
           IconButton(
-            icon: Icon(Icons.open_in_new),
+            icon: const Icon(Icons.open_in_new),
             onPressed: () => launch(url),
           ),
         ],

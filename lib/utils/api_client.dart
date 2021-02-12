@@ -28,10 +28,10 @@ class JwtTokenPair {
   DateTime refreshExpire;
 
   JwtTokenPair(this.access, this.refresh) {
-    var accessDecoded = JwtDecoder.decode(access);
+    final accessDecoded = JwtDecoder.decode(access);
     accessExpire = DateTime.fromMillisecondsSinceEpoch(
         accessDecoded['exp'] * 1000);
-    var refreshDecoded = JwtDecoder.decode(refresh);
+    final refreshDecoded = JwtDecoder.decode(refresh);
     refreshExpire = DateTime.fromMillisecondsSinceEpoch(
         refreshDecoded['exp'] * 1000);
     // TODO: checks: type, time
@@ -141,12 +141,12 @@ class HttpApiClient {
           (response?.statusCode == 401 || response?.statusCode == 403);
       },
       refreshToken: (token, client) async {
-        var response = await post(refreshUrl, {'refresh': token.refreshToken});
+        final response = await post(refreshUrl, {'refresh': token.refreshToken});
         return JwtTokenPair(response['access'], token.refreshToken).asOauth();
       },
     );
     delayer = DelayInterceptor(netDelay);
-    var logger = createLogger();
+    final logger = createLogger();
 
     httpClient.interceptors.addAll([
       refresher,
@@ -169,12 +169,12 @@ class HttpApiClient {
   }
 
   _setBaseUrl() {
-    var portString = port != null ? ':$port' : '';
+    final portString = port != null ? ':$port' : '';
     httpClient.options.baseUrl = '$scheme://$host$portString/api/v1';
   }
 
   void authenticate(Map<String, dynamic> authData) async {
-    var response = await post(authUrl, authData);
+    final response = await post(authUrl, authData);
     refresher.setToken(JwtTokenPair(response['access'],
         response['refresh']).asOauth());
   }
@@ -184,17 +184,17 @@ class HttpApiClient {
   }
 
   void storeSettings() async {
-    var sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('apiClient:scheme', scheme);
-    sharedPreferences.setString('apiClient:host', host);
-    sharedPreferences.setInt('apiClient:port', port);
-    sharedPreferences.setBool('apiClient:fake', fake);
-    sharedPreferences.setBool('apiClient:offline', offline);
-    sharedPreferences.setInt('apiClient:netDelay', netDelay);
+    await SharedPreferences.getInstance()
+      ..setString('apiClient:scheme', scheme)
+      ..setString('apiClient:host', host)
+      ..setInt('apiClient:port', port)
+      ..setBool('apiClient:fake', fake)
+      ..setBool('apiClient:offline', offline)
+      ..setInt('apiClient:netDelay', netDelay);
   }
 
   void restoreSettings() async {
-    var sharedPreferences = await SharedPreferences.getInstance();
+    final sharedPreferences = await SharedPreferences.getInstance();
     scheme = sharedPreferences.getString('apiClient:scheme') ?? 'http';
     host = sharedPreferences.getString('apiClient:host') ?? 'localhost';
     port = sharedPreferences.getInt('apiClient:port');
@@ -220,21 +220,21 @@ class HttpApiClient {
 
   Future<dynamic> get(String path, {Map<String, dynamic> params}) async {
     return await _doRequest(() async {
-      var response = await httpClient.get(path, queryParameters: params);
+      final response = await httpClient.get(path, queryParameters: params);
       return response.data;
     });
   }
 
   Future<dynamic> post(String path, Map<String, dynamic> data) async {
     return await _doRequest(() async {
-      var response = await httpClient.post(path, data: data);
+      final response = await httpClient.post(path, data: data);
       return response.data;
     });
   }
 
   Future<dynamic> patch(String path, Map<String, dynamic> data) async {
     return await _doRequest(() async {
-      var response = await httpClient.patch(path, data: data);
+      final response = await httpClient.patch(path, data: data);
       return response.data;
     });
   }

@@ -26,7 +26,7 @@ class SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
 
-    var client = context.read<HttpApiClient>();
+    final client = context.read<HttpApiClient>();
     _scheme = client.scheme;
     _hostController.text = client.host;
     _portController.text = client.port != null ? client.port.toString() : null;
@@ -39,14 +39,14 @@ class SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Настройки'),
+        title: const Text('Настройки'),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
+          padding: const EdgeInsets.fromLTRB(50, 10, 50, 10),
           children: [
-            Text(
+            const Text(
               'API',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -57,7 +57,7 @@ class SettingsPageState extends State<SettingsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Фейковые данные'),
+                const Text('Фейковые данные'),
                 Switch(
                   value: _fake,
                   onChanged: (newVal) => setState(() => _fake = newVal),
@@ -67,7 +67,7 @@ class SettingsPageState extends State<SettingsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Оффлайн'),
+                const Text('Оффлайн'),
                 Switch(
                   value: _offline,
                   onChanged: (newVal) => setState(() => _offline = newVal),
@@ -75,17 +75,17 @@ class SettingsPageState extends State<SettingsPage> {
               ],
             ),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(labelText: 'Протокол'),
+              decoration: const InputDecoration(labelText: 'Протокол'),
               value: _scheme,
               onChanged: (newVal) => setState(() => _scheme = newVal),
               items: [
                 DropdownMenuItem(
                   value: 'http',
-                  child: Text('HTTP'),
+                  child: const Text('HTTP'),
                 ),
                 DropdownMenuItem(
                   value: 'https',
-                  child: Text('HTTPS'),
+                  child: const Text('HTTPS'),
                 ),
               ],
             ),
@@ -94,14 +94,14 @@ class SettingsPageState extends State<SettingsPage> {
               controller: _hostController,
               validator: requiredString,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: InputDecoration(labelText: 'Хост'),
+              decoration: const InputDecoration(labelText: 'Хост'),
             ),
             TextFormField(
               enabled: !_fake,
               controller: _portController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Порт',
                 hintText: 'авто',
                 helperText: 'пусто - автоопределение',
@@ -111,13 +111,13 @@ class SettingsPageState extends State<SettingsPage> {
               controller: _netDelayController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Задержка сети (сек)',
               ),
             ),
             const SizedBox(height: 30),
             RaisedButton(
-              child: Text('Сохранить'),
+              child: const Text('Сохранить'),
               onPressed: _save,
             ),
           ],
@@ -131,7 +131,7 @@ class SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-    var client = context.read<HttpApiClient>();
+    final client = context.read<HttpApiClient>();
     client.configure(
       _scheme,
       _hostController.text,

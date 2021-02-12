@@ -7,6 +7,7 @@ import '../repos/user.dart';
 import '../utils/api_client.dart';
 import '../utils/dialogs.dart';
 import '../utils/validators.dart';
+import '../utils/widgets.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -32,12 +33,12 @@ class LoginPageState extends State<LoginPage> {
     List<Widget> actions;
     if (_isLoading) {
       actions = [
-        Center(child: CircularProgressIndicator()),
+        const BodyLoading(),
       ];
     } else {
       actions = [
         RaisedButton(
-          child: Text('Вход'),
+          child: const Text('Вход'),
           onPressed: _login,
         ),
       ];
@@ -45,10 +46,10 @@ class LoginPageState extends State<LoginPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Skill manager'),
+        title: const Text('Skill manager'),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: _isLoading ? null : _settings,
           ),
         ],
@@ -56,9 +57,9 @@ class LoginPageState extends State<LoginPage> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(50),
+          padding: const EdgeInsets.all(50),
           children: [
-            Text(
+            const Text(
               'Вход',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -69,7 +70,7 @@ class LoginPageState extends State<LoginPage> {
             TextFormField(
               controller: _loginController,
               validator: requiredString,
-              decoration: InputDecoration(labelText: 'Логин'),
+              decoration: const InputDecoration(labelText: 'Логин'),
               textInputAction: TextInputAction.next,
               enabled: !_isLoading,
             ),
@@ -77,7 +78,7 @@ class LoginPageState extends State<LoginPage> {
               controller: _passwordController,
               validator: requiredString,
               enabled: !_isLoading,
-              decoration: InputDecoration(labelText: 'Пароль'),
+              decoration: const InputDecoration(labelText: 'Пароль'),
             ),
             const SizedBox(height: 30),
             ...actions,
@@ -92,7 +93,7 @@ class LoginPageState extends State<LoginPage> {
       return;
     }
 
-    var userRepo = context.read<UserRepo>();
+    final userRepo = context.read<UserRepo>();
     setState(() => _isLoading = true);
     try {
       await userRepo.authenticate(_loginController.text,
@@ -110,12 +111,13 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _restoreAuth() async {
-    var client = context.read<HttpApiClient>();
+    final client = context.read<HttpApiClient>();
     await client.restoreSettings();
-    var sharedPreferences = await SharedPreferences.getInstance();
+
+    final sharedPreferences = await SharedPreferences.getInstance();
     _loginController.text = sharedPreferences.getString('auth:login');
     _passwordController.text = sharedPreferences.getString('auth:password');
-    var autoLogin = sharedPreferences.getBool('auth:autoLogin') ?? false;
+    final autoLogin = sharedPreferences.getBool('auth:autoLogin') ?? false;
 
     if (autoLogin && _loginController.text != null &&
         _passwordController.text != null) {
@@ -124,7 +126,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _storeAuth() async {
-    var sharedPreferences = await SharedPreferences.getInstance();
+    final sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setString('auth:login', _loginController.text);
     sharedPreferences.setString('auth:password', _passwordController.text);
     sharedPreferences.setBool('auth:autoLogin', true);

@@ -13,12 +13,12 @@ class RetryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 15, top: 10),
+      padding: const EdgeInsets.only(bottom: 15, top: 10),
       child: Column(
         children: [
-          Text('Шот не удалось...'),
+          const Text('Шот не удалось...'),
           RaisedButton(
-            child: Text('Повторить'),
+            child: const Text('Повторить'),
             onPressed: retry,
           ),
         ],
@@ -40,9 +40,9 @@ class RetryBody extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text('Шот не удалось...'),
+          const Text('Шот не удалось...'),
           RaisedButton(
-            child: Text('Повторить'),
+            child: const Text('Повторить'),
             onPressed: retry,
           ),
         ],
@@ -53,25 +53,31 @@ class RetryBody extends StatelessWidget {
 
 
 class EmptyBody extends StatelessWidget {
+  const EmptyBody({ Key key }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('ниче нету...'));
+    return const Center(child: Text('ниче нету...'));
   }
 }
 
 
 class BodyLoading extends StatelessWidget {
+  const BodyLoading({ Key key }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: CircularProgressIndicator());
+    return const Center(child: CircularProgressIndicator());
   }
 }
 
 
 class ItemLoading extends StatelessWidget {
+  const ItemLoading({ Key key }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Padding(
         padding: EdgeInsets.only(bottom: 15, top: 10),
         child: CircularProgressIndicator(),
@@ -98,7 +104,7 @@ class PaginatedListView extends StatelessWidget {
       child: Consumer<LimitOffsetPaginator>(
         builder: (context, _paginator, child) {
           if (paginator.isEnd && (paginator.items?.isEmpty ?? true)) {
-            return EmptyBody();
+            return const EmptyBody();
           }
 
           if (paginator.loadingIsFailed) {
@@ -109,7 +115,7 @@ class PaginatedListView extends StatelessWidget {
             if (!paginator.isLoading) {
               paginator.fetchNext(notifyStart: false);
             }
-            return BodyLoading();
+            return const BodyLoading();
           }
 
           return RefreshIndicator(
@@ -117,7 +123,7 @@ class PaginatedListView extends StatelessWidget {
               controller: scrollController,
               itemCount: paginator.items.length + (paginator.isEnd ? 0 : 1),
               itemBuilder: _itemBuilder,
-              separatorBuilder: (context, index) => Divider(),
+              separatorBuilder: (context, index) => const Divider(),
               shrinkWrap: true,
             ),
             onRefresh: _refresh,
@@ -134,10 +140,10 @@ class PaginatedListView extends StatelessWidget {
       }
 
       paginator.fetchNext(notifyStart: false);
-      return ItemLoading();
+      return const ItemLoading();
     }
 
-    var item = paginator.items[index];
+    final item = paginator.items[index];
     return itemBuilder(context, item);
   }
 
