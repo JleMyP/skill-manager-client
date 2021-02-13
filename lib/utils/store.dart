@@ -6,6 +6,9 @@ class SelectedScreenStore extends ChangeNotifier {
 
   int get screen => _screen;
   set screen(int val) {
+    if (_screen == val) {
+      return;
+    }
     _screen = val;
     notifyListeners();
   }
@@ -19,6 +22,9 @@ class SelectedPageStore extends ChangeNotifier {
 
   String get page => _page;
   set page(String val) {
+    if (_page == val) {
+      return;
+    }
     _page = val;
     notifyListeners();
   }
@@ -30,6 +36,9 @@ class ButtonState extends ChangeNotifier {
 
   bool get show => _show;
   set show(bool val) {
+    if (_show == val) {
+      return;
+    }
     _show = val;
     notifyListeners();
   }
@@ -41,6 +50,9 @@ class BottomBarState extends ChangeNotifier {
 
   bool get show => _show;
   set show(bool val) {
+    if (_show == val) {
+      return;
+    }
     _show = val;
     notifyListeners();
   }

@@ -18,14 +18,10 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
   bool loadingIsFailed = false;
   int limit = 25;
   int count;
-  Exception lastException;
-  Logger logger;
+  Logger _logger;
 
-  LimitOffsetPaginator() {
-    logger = createLogger();
-  }
-  LimitOffsetPaginator.withRepo(this.repo) {
-    logger = createLogger();
+  LimitOffsetPaginator({this.repo}) {
+    _logger = createLogger();
   }
 
   UnmodifiableListView<K> get items => UnmodifiableListView(_items);
@@ -49,7 +45,6 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     _items?.clear();
     count = null;
     loadingIsFailed = false;
-    lastException = null;
     isLoading = false;
   }
 
@@ -64,7 +59,6 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
     }
 
     loadingIsFailed = false;
-    lastException = null;
     isLoading = true;
     if (notifyStart) {
       notifyListeners();
@@ -75,9 +69,8 @@ class LimitOffsetPaginator<T extends BaseRestRepository, K extends BaseModel>
       pair = await repo.getList(params: _params);
     } on Exception catch(e, s) {
       loadingIsFailed = true;
-      lastException = e;
       isLoading = false;
-      logger.e('get list error', e, s);
+      _logger.e('get list error', e, s);
       notifyListeners();
       return null;
     }

@@ -24,18 +24,18 @@ class TagListPage extends StatefulWidget {
 
 
 class TagListState extends State<TagListPage> {
-  ButtonState bs;
+  ButtonState _buttonState;
 
   @override
   void initState() {
     super.initState();
-    bs = ButtonState();
+    _buttonState = ButtonState();
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ButtonState>.value(
-      value: bs,
+      value: _buttonState,
       child: Consumer<ButtonState>(
         child: Body(),
         builder: (context, _bs, child) => Scaffold(
@@ -76,8 +76,8 @@ class BodyState extends State<Body> {
     super.initState();
     _scrollController.addListener(_handleScroll);
     final repo = context.read<TagRepo>();
-    paginator = LimitOffsetPaginator<TagRepo, Tag>.withRepo(repo);
-    paginator.fetchNext(notifyStart: false);
+    paginator = LimitOffsetPaginator<TagRepo, Tag>(repo: repo)
+      ..fetchNext(notifyStart: false);
   }
 
   @override
@@ -162,7 +162,6 @@ class BodyState extends State<Body> {
       return;
     }
 
-    var paginator = context.read<LimitOffsetPaginator<TagRepo, Tag>>();
     await paginator.deleteItem(item);
   }
 }
@@ -176,38 +175,44 @@ class TagFilter extends StatefulWidget {
 
 class TagFilterState extends State<TagFilter> {
   final _formKey = GlobalKey<FormState>();
-
-  int like = 0;
+  int _like = 0;
 
   @override
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
       child: Padding(
-        padding: EdgeInsets.all(20),
-        child: ListView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
           children: [
-            DrawerHeader(
-              child: Text('Фильтры меток', style: TextStyle(fontSize: 20)),
-            ),
-            DropdownButtonFormField<int>(
-              decoration: InputDecoration(labelText: 'Лайк'),
-              value: like,
-              onChanged: (newVal) => setState(() => like = newVal),
-              items: [
-                DropdownMenuItem(
-                  value: 1,
-                  child: Text('Да'),
-                ),
-                DropdownMenuItem(
-                  value: -1,
-                  child: Text('Нет'),
-                ),
-                DropdownMenuItem(
-                  value: 0,
-                  child: Text('Пофиг'),
-                ),
-              ],
+            Expanded(
+              child: ListView(
+                children: [
+                  DrawerHeader(
+                    child: const Text('Фильтры меток', style: TextStyle(fontSize: 20)),
+                  ),
+                  // TODO: bottomBar
+                  DropdownButtonFormField<int>(
+                    decoration: const InputDecoration(labelText: 'Лайк'),
+                    value: _like,
+                    onChanged: (newVal) => setState(() => _like = newVal),
+                    items: [
+                      DropdownMenuItem(
+                        value: 1,
+                        child: const Text('Да'),
+                      ),
+                      DropdownMenuItem(
+                        value: -1,
+                        child: const Text('Нет'),
+                      ),
+                      DropdownMenuItem(
+                        value: 0,
+                        child: const Text('Пофиг'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             RaisedButton(
               child: const Text('Сохранить'),

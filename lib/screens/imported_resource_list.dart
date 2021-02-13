@@ -91,8 +91,8 @@ class BodyState extends State<Body> {
     super.initState();
     _scrollController.addListener(_handleScroll);
     final repo = context.read<ImportedResourceRepo>();
-    _paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>
-        .withRepo(repo)..fetchNext(notifyStart: false);
+    _paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>(repo: repo)
+      ..fetchNext(notifyStart: false);
   }
 
   @override
@@ -128,6 +128,7 @@ class BodyState extends State<Body> {
     };
 
     return Slidable(
+      key: ObjectKey(item),
       actionPane: SlidableDrawerActionPane(),
       child: ChangeNotifierProvider<ImportedResource>.value(
         value: item,
@@ -213,26 +214,24 @@ class BodyState extends State<Body> {
 class ConvexBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var screen = context.watch<SelectedScreenStore>();
+    final theme = Theme.of(context);
+    final screenStore = context.watch<SelectedScreenStore>();
 
     return ConvexAppBar(
       style: TabStyle.reactCircle,
       backgroundColor: theme.primaryColor,
       color: theme.backgroundColor,
+      initialActiveIndex: screenStore.screen,
       items: [
         const TabItem(icon: Icons.home, title: 'Все'),
         const TabItem(icon: Icons.visibility_off, title: 'Игнор'),
         const TabItem(icon: Icons.visibility, title: 'Не игнор'),
       ],
-      onTap: (i) => _onItemTapped(screen, i),
+      onTap: (i) => _onItemTapped(screenStore, i),
     );
   }
 
-  _onItemTapped(SelectedScreenStore screen, int newIndex) {
-    if (screen.screen == newIndex) {
-      return;
-    }
-    screen.screen = newIndex;
+  _onItemTapped(SelectedScreenStore screenStore, int newIndex) {
+    screenStore.screen = newIndex;
   }
 }
