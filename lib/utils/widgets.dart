@@ -103,19 +103,16 @@ class PaginatedListView extends StatelessWidget {
       value: paginator,
       child: Consumer<LimitOffsetPaginator>(
         builder: (context, _paginator, child) {
-          if (paginator.isEnd && (paginator.items?.isEmpty ?? true)) {
+          if (paginator.isEmpty) {
             return const EmptyBody();
           }
 
-          if (paginator.loadingIsFailed) {
-            return RetryBody(paginator.fetchNext);
+          if (paginator.isLoading) {
+            return const BodyLoading();
           }
 
-          if (paginator.count == null) {
-            if (!paginator.isLoading) {
-              paginator.fetchNext(notifyStart: false);
-            }
-            return const BodyLoading();
+          if (paginator.isNotConnected && paginator.isFailed) {
+            return RetryBody(paginator.fetchNext);
           }
 
           return RefreshIndicator(
@@ -135,10 +132,11 @@ class PaginatedListView extends StatelessWidget {
 
   Widget _itemBuilder(BuildContext context, int index) {
     if (index == paginator.items.length && !paginator.isEnd) {
-      if (paginator.loadingIsFailed) {
+      if (paginator.isFailed) {
         return RetryItem(paginator.fetchNext);
       }
 
+      // TODO: вынести бы куда-нить
       paginator.fetchNext(notifyStart: false);
       return const ItemLoading();
     }

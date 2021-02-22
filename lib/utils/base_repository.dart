@@ -70,8 +70,6 @@ abstract class BaseRestRepository<T extends BaseModel> {
   }
 
   Future<T> getDetail(T item) async {
-    T item;
-
     if (client.fake) {
       if (client.netDelay != 0) {
         await Future.delayed(Duration(seconds: client.netDelay));

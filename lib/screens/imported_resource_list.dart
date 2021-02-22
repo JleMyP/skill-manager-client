@@ -76,7 +76,7 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   int _prevScreen;
-  LimitOffsetPaginator<ImportedResourceRepo, ImportedResource> _paginator;
+  LimitOffsetPaginator<ImportedResource> _paginator;
 
   final ScrollController _scrollController = ScrollController();
   final Widget _github = SvgPicture.asset(
@@ -91,7 +91,7 @@ class BodyState extends State<Body> {
     super.initState();
     _scrollController.addListener(_handleScroll);
     final repo = context.read<ImportedResourceRepo>();
-    _paginator = LimitOffsetPaginator<ImportedResourceRepo, ImportedResource>(repo: repo)
+    _paginator = LimitOffsetPaginator<ImportedResource>(repo: repo)
       ..fetchNext(notifyStart: false);
   }
 

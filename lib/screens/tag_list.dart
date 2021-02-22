@@ -69,14 +69,14 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   final ScrollController _scrollController = ScrollController();
-  LimitOffsetPaginator<TagRepo, Tag> paginator;
+  LimitOffsetPaginator<Tag> paginator;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
     final repo = context.read<TagRepo>();
-    paginator = LimitOffsetPaginator<TagRepo, Tag>(repo: repo)
+    paginator = LimitOffsetPaginator<Tag>(repo: repo)
       ..fetchNext(notifyStart: false);
   }
 

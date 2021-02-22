@@ -113,17 +113,40 @@ class ExceptionWrapInterceptor extends Interceptor {
 
 
 class HttpApiClient {
-  String scheme = 'http';
-  String host = 'localhost';
-  int port;
   bool fake = true;
   bool offline = true;
-  int netDelay = 0;
-  String authUrl = '/token/';
-  String refreshUrl = '/token/refresh/';
-  Fresh<OAuth2Token> refresher;
-  DelayInterceptor delayer;
+
+  final _authUrl = '/token/';
+  final _refreshUrl = '/token/refresh/';
+
+  String _scheme = 'http';
+  String _host = 'localhost';
+  int _port;
+  int _netDelay = 0;
+  Fresh<OAuth2Token> _refresher;
+  DelayInterceptor _delayer;
   Dio httpClient;
+
+  String get scheme => _scheme;
+  set scheme(String value) {
+    _scheme = value;
+    _setBaseUrl();
+  }
+  String get host => _host;
+  set host(String value) {
+    _host = value;
+    _setBaseUrl();
+  }
+  int get port => _port;
+  set port(int value) {
+    _port = value;
+    _setBaseUrl();
+  }
+  int get netDelay => _netDelay;
+  set netDelay(int value) {
+    _netDelay = value;
+    _delayer.delaySeconds = netDelay;
+  }
 
   HttpApiClient.withHttpClient(this.httpClient) {
     _setBaseUrl();
@@ -133,75 +156,81 @@ class HttpApiClient {
     httpClient = Dio();
     _setBaseUrl();
 
-    refresher = Fresh.oAuth2(
+    _refresher = Fresh.oAuth2(
       tokenStorage: InMemoryTokenStorage(),  // TODO: shared preferences
       shouldRefresh: (response) {
-        return response?.request?.path != authUrl &&
-          response?.request?.path != refreshUrl &&
+        return response?.request?.path != _authUrl &&
+          response?.request?.path != _refreshUrl &&
           (response?.statusCode == 401 || response?.statusCode == 403);
       },
       refreshToken: (token, client) async {
-        final response = await post(refreshUrl, {'refresh': token.refreshToken});
+        final response = await post(_refreshUrl, {'refresh': token.refreshToken});
         return JwtTokenPair(response['access'], token.refreshToken).asOauth();
       },
     );
-    delayer = DelayInterceptor(netDelay);
+    _delayer = DelayInterceptor(_netDelay);
     final logger = createLogger();
 
     httpClient.interceptors.addAll([
-      refresher,
+      _refresher,
       HttpFormatter(logger: logger),
-      delayer,
+      _delayer,
       ExceptionWrapInterceptor(),
     ]);
   }
 
-  void configure(String scheme, String host, int port, bool fake, bool offline,
-      int netDelay) {
-    this.scheme = scheme;
-    this.host = host;
-    this.port = port;
-    this.fake = fake;
-    this.offline = offline;
-    this.netDelay = netDelay;
-    delayer.delaySeconds = netDelay;
+  void configure({
+      String scheme,
+      String host,
+      int port,
+      bool fake,
+      bool offline,
+      int netDelay,
+  }) {
+    _scheme = scheme;
+    _host = host;
+    _port = port;
+    fake = fake;
+    offline = offline;
+    _netDelay = netDelay;
+    _delayer.delaySeconds = netDelay;
     _setBaseUrl();
   }
 
   _setBaseUrl() {
-    final portString = port != null ? ':$port' : '';
-    httpClient.options.baseUrl = '$scheme://$host$portString/api/v1';
+    final portString = _port != null ? ':$_port' : '';
+    httpClient.options.baseUrl = '$scheme://$_host$portString/api/v1';
   }
 
   void authenticate(Map<String, dynamic> authData) async {
-    final response = await post(authUrl, authData);
-    refresher.setToken(JwtTokenPair(response['access'],
+    final response = await post(_authUrl, authData);
+    _refresher.setToken(JwtTokenPair(response['access'],
         response['refresh']).asOauth());
   }
 
   void logout() {
-    refresher.clearToken();
+    _refresher.clearToken();
   }
 
   void storeSettings() async {
     await SharedPreferences.getInstance()
       ..setString('apiClient:scheme', scheme)
-      ..setString('apiClient:host', host)
-      ..setInt('apiClient:port', port)
+      ..setString('apiClient:host', _host)
+      ..setInt('apiClient:port', _port)
       ..setBool('apiClient:fake', fake)
       ..setBool('apiClient:offline', offline)
-      ..setInt('apiClient:netDelay', netDelay);
+      ..setInt('apiClient:netDelay', _netDelay);
   }
 
   void restoreSettings() async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    scheme = sharedPreferences.getString('apiClient:scheme') ?? 'http';
-    host = sharedPreferences.getString('apiClient:host') ?? 'localhost';
-    port = sharedPreferences.getInt('apiClient:port');
+    _scheme = sharedPreferences.getString('apiClient:scheme') ?? 'http';
+    _host = sharedPreferences.getString('apiClient:host') ?? 'localhost';
+    _port = sharedPreferences.getInt('apiClient:port');
     fake = sharedPreferences.getBool('apiClient:fake') ?? true;
     offline = sharedPreferences.getBool('apiClient:offline') ?? true;
-    netDelay = sharedPreferences.getInt('apiClient:netDelay') ?? 0;
-    delayer.delaySeconds = netDelay;
+    _netDelay = sharedPreferences.getInt('apiClient:netDelay') ?? 0;
+    _delayer.delaySeconds = _netDelay;
     _setBaseUrl();
   }
 

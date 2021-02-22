@@ -133,12 +133,12 @@ class SettingsPageState extends State<SettingsPage> {
 
     final client = context.read<HttpApiClient>();
     client.configure(
-      _scheme,
-      _hostController.text,
-      _portController.text != '' ? int.parse(_portController.text) : null,
-      _fake,
-      _offline,
-      _netDelayController.text != '' ? int.parse(_netDelayController.text) : 0,
+      scheme: _scheme,
+      host: _hostController.text,
+      port: _portController.text != '' ? int.parse(_portController.text) : null,
+      fake: _fake,
+      offline: _offline,
+      netDelay: _netDelayController.text != '' ? int.parse(_netDelayController.text) : 0,
     );
     await client.storeSettings();
     Navigator.of(context).pop();
