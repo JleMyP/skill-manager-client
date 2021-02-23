@@ -105,9 +105,9 @@ class BodyState extends State<Body> {
             trailing: IconButton(
               icon: changedItem.like ? const Icon(Icons.favorite, color: Colors.red)
                   : const Icon(Icons.favorite_border),
-              onPressed: () async => await _changeLike(changedItem),
+              onPressed: () => _changeLike(changedItem),
             ),
-            onTap: () async => await _openItem(changedItem),
+            onTap: () => _openItem(changedItem),
           ),
         ),
       ),
@@ -116,13 +116,13 @@ class BodyState extends State<Body> {
           caption: 'Изменить',
           color: Colors.blue,
           icon: Icons.edit,
-          onTap: () async => await _editItem(item),
+          onTap: () => _editItem(item),
         ),
         IconSlideAction(
           caption: 'Удалить',
           color: Colors.red,
           icon: Icons.delete,
-          onTap: () async => await _deleteItem(item),
+          onTap: () => _deleteItem(item),
         ),
       ],
     );

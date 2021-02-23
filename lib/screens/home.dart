@@ -135,9 +135,7 @@ class LeftMenu extends StatelessWidget {
         ListTile(
           leading: const Icon(Icons.insert_drive_file),
           title: const Text('Логи'),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => LogConsole(dark: true, showCloseButton: true),
-          )),
+          onTap: () => _showLogs(context),
         ),
         ListTile(
           leading: const Icon(Icons.logout),
@@ -154,6 +152,12 @@ class LeftMenu extends StatelessWidget {
       ..remove('auth:password')
       ..remove('auth:autoLogin');
     context.read<UserRepo>().logout();
-    Navigator.of(context).pushReplacementNamed('/login');
+    await Navigator.of(context).pushReplacementNamed('/login');
+  }
+
+  _showLogs(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => LogConsole(dark: true, showCloseButton: true),
+    ));
   }
 }

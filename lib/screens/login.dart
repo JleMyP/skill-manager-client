@@ -30,28 +30,15 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> actions;
-    if (_isLoading) {
-      actions = [
-        const BodyLoading(),
-      ];
-    } else {
-      actions = [
-        RaisedButton(
-          child: const Text('Вход'),
-          onPressed: _login,
-        ),
-      ];
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Skill manager'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _isLoading ? null : _settings,
-          ),
+          if (!_isLoading)
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: _settings,
+            ),
         ],
       ),
       body: Form(
@@ -81,7 +68,11 @@ class LoginPageState extends State<LoginPage> {
               decoration: const InputDecoration(labelText: 'Пароль'),
             ),
             const SizedBox(height: 30),
-            ...actions,
+            _isLoading ? const BodyLoading()
+                : RaisedButton(
+                  child: const Text('Вход'),
+                  onPressed: _login,
+                ),
           ],
         ),
       ),
@@ -95,11 +86,12 @@ class LoginPageState extends State<LoginPage> {
 
     final userRepo = context.read<UserRepo>();
     setState(() => _isLoading = true);
+
     try {
       await userRepo.authenticate(_loginController.text,
           _passwordController.text);
       await _storeAuth();
-      Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
+      await Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
     } on Exception catch (e) {
       await showSimpleDialog(context, 'Авторизация не удалась (', e.toString());
       setState(() => _isLoading = false);
@@ -126,9 +118,9 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _storeAuth() async {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('auth:login', _loginController.text);
-    sharedPreferences.setString('auth:password', _passwordController.text);
-    sharedPreferences.setBool('auth:autoLogin', true);
+    await SharedPreferences.getInstance()
+      ..setString('auth:login', _loginController.text)
+      ..setString('auth:password', _passwordController.text)
+      ..setBool('auth:autoLogin', true);
   }
 }
