@@ -190,8 +190,8 @@ class HttpApiClient {
     _scheme = scheme;
     _host = host;
     _port = port;
-    fake = fake;
-    offline = offline;
+    this.fake = fake;
+    this.offline = offline;
     _netDelay = netDelay;
     _delayer.delaySeconds = netDelay;
     _setBaseUrl();
