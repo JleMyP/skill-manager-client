@@ -146,9 +146,10 @@ class BodyState extends State<Body> {
   }
 
   _openItem(Tag item) async {
-    final repo = context.read<TagRepo>();
-    final detailed = await repo.getDetail(item);
-    // await Navigator.of(context).pushNamed('/tag/view', arguments: detailed);
+    await Navigator.of(context).pushNamed('/tag/view', arguments: ItemWithPaginator(
+      paginator: paginator,
+      item: item,
+    ));
   }
 
   _editItem(Tag item) async {

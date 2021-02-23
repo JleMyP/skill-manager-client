@@ -1,5 +1,16 @@
 import 'package:flutter/foundation.dart';
 
+import 'base_model.dart';
+import 'paginators.dart';
+
+
+class ItemWithPaginator {
+  final LimitOffsetPaginator paginator;
+  final BaseModel item;
+
+  ItemWithPaginator({this.paginator, this.item});
+}
+
 
 class SelectedScreenStore extends ChangeNotifier {
   int _screen = 0;

@@ -9,6 +9,7 @@ import 'screens/imported_resource_edit.dart';
 import 'screens/imported_resource_view.dart';
 import 'screens/login.dart';
 import 'screens/settings.dart';
+import 'screens/tag_view.dart';
 import 'utils/api_client.dart';
 
 
@@ -33,6 +34,7 @@ class App extends StatelessWidget {
         '/home': (context) => HomePageWrapper(),
         '/imported_resource/view': (context) => ImportedResourceViewPage(),
         '/imported_resource/edit': (context) => ImportedResourceEditPage(),
+        '/tag/view': (context) => TagViewPage(),
       },
     );
   }
