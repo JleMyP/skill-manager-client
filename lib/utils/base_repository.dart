@@ -14,8 +14,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
   HttpApiClient client;
   String resultKey;
 
-  BaseRestRepository({this.resultKey});
-  BaseRestRepository.withClient(this.client, {this.resultKey});
+  BaseRestRepository({this.client, this.resultKey});
 
   String get baseUrl;
   int get fakeListCount => 30;

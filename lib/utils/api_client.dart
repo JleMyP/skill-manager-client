@@ -74,8 +74,8 @@ class ExceptionWrapInterceptor extends Interceptor {
     }
 
     var data = error.response.data;
-    if (!(error.response.headers['content-type'][0] ?? '').contains(
-        'application/json')) {
+    var ct = error.response.headers['content-type'][0];
+    if (ct == null || !ct.contains('application/json')) {
       return ApiException(
         rawData: data,
         originalException: error,
@@ -125,7 +125,7 @@ class HttpApiClient {
   int _netDelay = 0;
   Fresh<OAuth2Token> _refresher;
   DelayInterceptor _delayer;
-  Dio httpClient;
+  Dio _httpClient;
 
   String get scheme => _scheme;
   set scheme(String value) {
@@ -148,12 +148,8 @@ class HttpApiClient {
     _delayer.delaySeconds = netDelay;
   }
 
-  HttpApiClient.withHttpClient(this.httpClient) {
-    _setBaseUrl();
-  }
-
-  HttpApiClient() {
-    httpClient = Dio();
+  HttpApiClient({ Dio client }) {
+    _httpClient = client ?? Dio();
     _setBaseUrl();
 
     _refresher = Fresh.oAuth2(
@@ -171,7 +167,7 @@ class HttpApiClient {
     _delayer = DelayInterceptor(_netDelay);
     final logger = createLogger();
 
-    httpClient.interceptors.addAll([
+    _httpClient.interceptors.addAll([
       _refresher,
       HttpFormatter(logger: logger),
       _delayer,
@@ -199,7 +195,7 @@ class HttpApiClient {
 
   _setBaseUrl() {
     final portString = _port != null ? ':$_port' : '';
-    httpClient.options.baseUrl = '$scheme://$_host$portString/api/v1';
+    _httpClient.options.baseUrl = '$scheme://$_host$portString/api/v1';
   }
 
   void authenticate(Map<String, dynamic> authData) async {
@@ -249,28 +245,29 @@ class HttpApiClient {
 
   Future<dynamic> get(String path, {Map<String, dynamic> params}) async {
     return await _doRequest(() async {
-      final response = await httpClient.get(path, queryParameters: params);
+      final response = await _httpClient.get(path, queryParameters: params);
       return response.data;
     });
   }
 
   Future<dynamic> post(String path, Map<String, dynamic> data) async {
     return await _doRequest(() async {
-      final response = await httpClient.post(path, data: data);
+      final response = await _httpClient.post(path, data: data);
       return response.data;
     });
   }
 
   Future<dynamic> patch(String path, Map<String, dynamic> data) async {
     return await _doRequest(() async {
-      final response = await httpClient.patch(path, data: data);
+      final response = await _httpClient.patch(path, data: data);
       return response.data;
     });
   }
 
-  Future delete(String path, {Map<String, dynamic> params}) async {
+  Future<dynamic> delete(String path, {Map<String, dynamic> params}) async {
     await _doRequest(() async {
-      await httpClient.delete(path, queryParameters: params);
+      final response = await _httpClient.delete(path, queryParameters: params);
+      return response.data;
     });
   }
 }

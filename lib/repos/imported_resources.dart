@@ -1,13 +1,13 @@
 import '../models/imported_resource.dart';
+import '../utils/api_client.dart';
 import '../utils/base_repository.dart';
 
 
 class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
   String get baseUrl => '/imported_resources/';
 
-  ImportedResourceRepo(): super(resultKey: 'results');
-  ImportedResourceRepo.withClient(client):
-    super.withClient(client, resultKey: 'results');
+  ImportedResourceRepo({ HttpApiClient client }):
+    super(client: client, resultKey: 'results');
 
   @override
   ImportedResource parseItemFromList(Map<String, dynamic> item) {

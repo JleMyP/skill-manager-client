@@ -120,7 +120,7 @@ class TagViewLoadedPage extends StatelessWidget {
                 }
 
                 if (index.isEven) {
-                  return Divider();
+                  return const Divider();
                 }
 
                 final value = tag.values[(index - 1) ~/ 2];
@@ -139,16 +139,22 @@ class TagViewLoadedPage extends StatelessWidget {
   }
 
   _changeLike(BuildContext context) async {
-    _showLoadingSnackBar();
+    _scaffoldKey.currentState.showSnackBar(
+      createLoadingSnackBar(),
+    );
     try {
       await paginator.repo.updateItem(tag, {'like': !tag.like});
       tag.update(like: !tag.like);
     } on Exception {
-      _showErrorSnackBar(() => _changeLike(context));
+      _scaffoldKey.currentState.showSnackBar(
+        createErrorSnackBar(() => _changeLike(context)),
+      );
       return;
     }
 
-    _showSuccessSnackBar();
+    _scaffoldKey.currentState.showSnackBar(
+      createSuccessSnackBar(),
+    );
   }
 
   _delete(BuildContext context) async {
@@ -158,64 +164,19 @@ class TagViewLoadedPage extends StatelessWidget {
       return;
     }
 
-    _showLoadingSnackBar();
+    _scaffoldKey.currentState.showSnackBar(
+      createLoadingSnackBar(),
+    );
     try {
       await paginator.deleteItem(tag);
     } on Exception {
-      _showErrorSnackBar(() => _delete(context));
+      _scaffoldKey.currentState.showSnackBar(
+        createErrorSnackBar(() => _delete(context)),
+      );
       return;
     }
 
     await Navigator.of(context).pop();
-  }
-
-  _showLoadingSnackBar() {
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.yellowAccent,
-        behavior: SnackBarBehavior.fixed,
-        content: Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              child: const CircularProgressIndicator(),
-            ),
-            const SizedBox(width: 25),
-            const Text('грузим...'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  _showErrorSnackBar(VoidCallback retry) {
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.fixed,
-        content: const Text('Ашипка!'),
-        action: SnackBarAction(
-          label: 'Повторить',
-          onPressed: retry,
-        ),
-      ),
-    );
-  }
-
-  _showSuccessSnackBar() {
-    _scaffoldKey.currentState.showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.greenAccent,
-        behavior: SnackBarBehavior.fixed,
-        content: Row(
-          children: [
-            const Icon(Icons.check),
-            const Text('Загружено!'),
-          ],
-        ),
-      ),
-    );
   }
 }
 

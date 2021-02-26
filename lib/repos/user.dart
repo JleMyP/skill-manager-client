@@ -9,7 +9,6 @@ class UserRepo extends ChangeNotifier {
   User currentUser;
 
   UserRepo();
-  UserRepo.withClient(this._client);
 
   set client(HttpApiClient value) => _client = value;
 

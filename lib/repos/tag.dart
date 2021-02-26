@@ -5,8 +5,7 @@ import '../utils/base_repository.dart';
 class TagRepo extends BaseRestRepository<Tag> {
   String get baseUrl => '/tags/';
 
-  TagRepo(): super(resultKey: 'results');
-  TagRepo.withClient(client): super.withClient(client, resultKey: 'results');
+  TagRepo({ client }): super(client: client, resultKey: 'results');
 
   @override
   Tag parseItemFromList(Map<String, dynamic> item) {

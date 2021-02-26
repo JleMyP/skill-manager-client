@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'base_model.dart';
 import 'paginators.dart';
 
 
@@ -87,21 +88,21 @@ class ItemLoading extends StatelessWidget {
 }
 
 
-typedef ItemBuilder = Widget Function(BuildContext context, dynamic item);
+typedef ItemBuilder<T> = Widget Function(BuildContext context, T item);
 
 
-class PaginatedListView extends StatelessWidget {
+class PaginatedListView<T extends BaseModel> extends StatelessWidget {
   final ScrollController scrollController;
-  final LimitOffsetPaginator paginator;
-  final ItemBuilder itemBuilder;
+  final LimitOffsetPaginator<T> paginator;
+  final ItemBuilder<T> itemBuilder;
 
   PaginatedListView(this.paginator, this.itemBuilder, [this.scrollController]);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<LimitOffsetPaginator>.value(
+    return ChangeNotifierProvider<LimitOffsetPaginator<T>>.value(
       value: paginator,
-      child: Consumer<LimitOffsetPaginator>(
+      child: Consumer<LimitOffsetPaginator<T>>(
         builder: (context, _paginator, child) {
           if (paginator.isEmpty) {
             return const EmptyBody();
@@ -149,4 +150,50 @@ class PaginatedListView extends StatelessWidget {
     paginator.reset();
     await paginator.fetchNext(notifyStart: false);
   }
+}
+
+
+SnackBar createLoadingSnackBar() {
+  return SnackBar(
+    backgroundColor: Colors.yellowAccent,
+    behavior: SnackBarBehavior.fixed,
+    content: Row(
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          child: const CircularProgressIndicator(),
+        ),
+        const SizedBox(width: 25),
+        const Text('грузим...'),
+      ],
+    ),
+  );
+}
+
+
+SnackBar createSuccessSnackBar() {
+  return SnackBar(
+    backgroundColor: Colors.greenAccent,
+    behavior: SnackBarBehavior.fixed,
+    content: Row(
+      children: [
+        const Icon(Icons.check),
+        const Text('Загружено!'),
+      ],
+    ),
+  );
+}
+
+
+SnackBar createErrorSnackBar(VoidCallback retry) {
+  return SnackBar(
+    backgroundColor: Colors.redAccent,
+    behavior: SnackBarBehavior.fixed,
+    content: const Text('Ашипка!'),
+    action: SnackBarAction(
+      label: 'Повторить',
+      onPressed: retry,
+    ),
+  );
 }

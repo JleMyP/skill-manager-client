@@ -91,40 +91,11 @@ class BodyState extends State<Body> {
     return PaginatedListView(paginator, _buildListItem, _scrollController);
   }
 
-  Widget _buildListItem(BuildContext context, dynamic _item) {
-    final item = _item as Tag;
-
-    return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      child: ChangeNotifierProvider<Tag>.value(
-        value: item,
-        child: Consumer<Tag>(
-          builder: (context, changedItem, child) => ListTile(
-            leading: changedItem.icon != null ? Text(changedItem.icon) : null,
-            title: Text(changedItem.name),
-            trailing: IconButton(
-              icon: changedItem.like ? const Icon(Icons.favorite, color: Colors.red)
-                  : const Icon(Icons.favorite_border),
-              onPressed: () => _changeLike(changedItem),
-            ),
-            onTap: () => _openItem(changedItem),
-          ),
-        ),
-      ),
-      actions: [
-        IconSlideAction(
-          caption: 'Изменить',
-          color: Colors.blue,
-          icon: Icons.edit,
-          onTap: () => _editItem(item),
-        ),
-        IconSlideAction(
-          caption: 'Удалить',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () => _deleteItem(item),
-        ),
-      ],
+  Widget _buildListItem(BuildContext context, Tag item) {
+    return TagListItem(
+      tag: item,
+      paginator: paginator,
+      key: ObjectKey(item),
     );
   }
 
@@ -137,33 +108,107 @@ class BodyState extends State<Body> {
       buttonState.show = true;
     }
   }
+}
 
-  _changeLike(Tag item) async {
-    final repo = context.read<TagRepo>();
-    await repo.updateItem(item, {'like': !item.like});
-    // TODO: отлов ошибок
-    item.update(like: !item.like);
+
+class TagListItem extends StatefulWidget {
+  final Tag tag;
+  final LimitOffsetPaginator<Tag> paginator;
+
+  TagListItem({this.tag, this.paginator, Key key}) : super(key: key);
+
+  @override
+  State<TagListItem> createState() => TagListItemState();
+}
+
+
+class TagListItemState extends State<TagListItem> {
+  bool _isLikeLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget trailing;
+    if (_isLikeLoading) {
+      trailing = const CircularProgressIndicator();
+    } else {
+      trailing = IconButton(
+        icon: widget.tag.like ? const Icon(Icons.favorite, color: Colors.red)
+            : const Icon(Icons.favorite_border),
+        onPressed: _changeLike,
+      );
+    }
+
+    // TODO: переусложение - смешивание прослушивания объекта и стейта виджета
+    //  вариант рещения - обертка вокруг Tag, включающая isLoading
+    return Slidable(
+      actionPane: SlidableDrawerActionPane(),
+      child: ChangeNotifierProvider<Tag>.value(
+        value: widget.tag,
+        child: Consumer<Tag>(
+          builder: (context, _, __) => ListTile(
+            leading: widget.tag.icon != null ? Text(widget.tag.icon) : null,
+            title: Text(widget.tag.name),
+            trailing: trailing,
+            onTap: _openItem,
+          ),
+        ),
+      ),
+      actions: [
+        IconSlideAction(
+          caption: 'Изменить',
+          color: Colors.blue,
+          icon: Icons.edit,
+          onTap: _editItem,
+        ),
+        IconSlideAction(
+          caption: 'Удалить',
+          color: Colors.red,
+          icon: Icons.delete,
+          onTap: _deleteItem,
+        ),
+      ],
+    );
   }
 
-  _openItem(Tag item) async {
+  _changeLike() async {
+    setState(() {
+      _isLikeLoading = true;
+    });
+
+    final repo = context.read<TagRepo>();
+    try {
+      await repo.updateItem(widget.tag, {'like': !widget.tag.like});
+      widget.tag.update(like: !widget.tag.like);
+    } on Exception {
+      Scaffold.of(context).showSnackBar(
+        createErrorSnackBar(_changeLike),
+      );
+    } finally {
+      setState(() {
+        _isLikeLoading = false;
+      });
+    }
+  }
+
+  _openItem() async {
     await Navigator.of(context).pushNamed('/tag/view', arguments: ItemWithPaginator(
-      paginator: paginator,
-      item: item,
+      paginator: widget.paginator,
+      item: widget.tag,
     ));
   }
 
-  _editItem(Tag item) async {
-    // await Navigator.of(context).pushNamed('/tag/edit', arguments: item);
+  _editItem() async {
+    // await Navigator.of(context).pushNamed('/tag/edit', arguments: widget.tag);
   }
 
-  _deleteItem(Tag item) async {
-    final confirm = await showConfirmDialog(context, 'Удалить метку?', item.name);
+  _deleteItem() async {
+    final confirm = await showConfirmDialog(context, 'Удалить метку?', widget.tag.name);
 
     if (!confirm) {
       return;
     }
 
-    await paginator.deleteItem(item);
+    await widget.paginator.deleteItem(widget.tag);
   }
 }
 

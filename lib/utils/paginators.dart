@@ -96,6 +96,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
     if (_items == null) {
       _items = pair.result;
     } else {
+      // TODO: отфильтровать дубли
       _items.addAll(pair.result);
     }
     _isLoading = false;
