@@ -16,7 +16,7 @@ jobs:
           java-version: '12.x'
       - uses: subosito/flutter-action@v1
         with:
-          channel: 'stable'
+          channel: 'dev'
       - run: flutter pub get
       - run: flutter build apk --target-platform android-arm64
       - name: upload artifacts
