@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -75,7 +74,7 @@ class TagViewLoadedPage extends StatelessWidget {
   final LimitOffsetPaginator paginator;
   final Future<void> Function() refresh;
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   TagViewLoadedPage({this.tag, this.paginator, this.refresh, Key key}) : super(key: key);
 
@@ -84,51 +83,53 @@ class TagViewLoadedPage extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: tag,
       child: Consumer<Tag>(
-        builder: (context, _, __) => Scaffold(
+        builder: (context, _, __) => ScaffoldMessenger(
           key: _scaffoldKey,
-          appBar: AppBar(
-            leading: tag.icon != null ? Text(tag.icon) : null,
-            title: Text(tag.name),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => _edit(context),
-              ),
-              PopupMenuButton(
-                onSelected: (action) => action(context),
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: _changeLike,
-                    child: tag.like ? const Text('Дизлайк')
-                        : const Text('Лайк'),
-                  ),
-                  PopupMenuItem(
-                    value: _delete,
-                    child: const Text('Удалить'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          body: RefreshIndicator(
-            onRefresh: refresh,
-            child: ListView.builder(
-              itemCount: tag.values.length * 2,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return TagInfo(tag: tag);
-                }
-
-                if (index.isEven) {
-                  return const Divider();
-                }
-
-                final value = tag.values[(index - 1) ~/ 2];
-                return TagValueListItem(value: value);
-              },
+          child: Scaffold(
+            appBar: AppBar(
+              leading: tag.icon != null ? Text(tag.icon) : null,
+              title: Text(tag.name),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _edit(context),
+                ),
+                PopupMenuButton(
+                  onSelected: (action) => action(context),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: _changeLike,
+                      child: tag.like ? const Text('Дизлайк')
+                          : const Text('Лайк'),
+                    ),
+                    PopupMenuItem(
+                      value: _delete,
+                      child: const Text('Удалить'),
+                    ),
+                  ],
+                ),
+              ],
             ),
+            body: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView.builder(
+                itemCount: tag.values.length * 2,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return TagInfo(tag: tag);
+                  }
+
+                  if (index.isEven) {
+                    return const Divider();
+                  }
+
+                  final value = tag.values[(index - 1) ~/ 2];
+                  return TagValueListItem(value: value);
+                },
+              ),
+            ),
+            floatingActionButton: FloatingButton(),
           ),
-          floatingActionButton: FloatingButton(),
         ),
       ),
     );

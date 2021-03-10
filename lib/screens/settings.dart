@@ -116,7 +116,7 @@ class SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 30),
-            RaisedButton(
+            TextButton(
               child: const Text('Сохранить'),
               onPressed: _save,
             ),

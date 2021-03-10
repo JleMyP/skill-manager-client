@@ -18,7 +18,7 @@ class RetryItem extends StatelessWidget {
       child: Column(
         children: [
           const Text('Шот не удалось...'),
-          RaisedButton(
+          TextButton(
             child: const Text('Повторить'),
             onPressed: retry,
           ),
@@ -42,7 +42,7 @@ class RetryBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text('Шот не удалось...'),
-          RaisedButton(
+          TextButton(
             child: const Text('Повторить'),
             onPressed: retry,
           ),

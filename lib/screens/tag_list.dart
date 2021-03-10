@@ -180,7 +180,7 @@ class TagListItemState extends State<TagListItem> {
       await repo.updateItem(widget.tag, {'like': !widget.tag.like});
       widget.tag.update(like: !widget.tag.like);
     } on Exception {
-      Scaffold.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         createErrorSnackBar(_changeLike),
       );
     } finally {
@@ -260,7 +260,7 @@ class TagFilterState extends State<TagFilter> {
                 ],
               ),
             ),
-            RaisedButton(
+            TextButton(
               child: const Text('Сохранить'),
               onPressed: () {},
             ),
