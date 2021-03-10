@@ -209,13 +209,18 @@ class HttpApiClient {
   }
 
   void storeSettings() async {
-    await SharedPreferences.getInstance()
-      ..setString('apiClient:scheme', scheme)
+    var sp = await SharedPreferences.getInstance();
+    sp..setString('apiClient:scheme', scheme)
       ..setString('apiClient:host', _host)
-      ..setInt('apiClient:port', _port)
       ..setBool('apiClient:fake', fake)
       ..setBool('apiClient:offline', offline)
       ..setInt('apiClient:netDelay', _netDelay);
+
+    if (_port != null) {
+      sp.setInt('apiClient:port', _port);
+    } else {
+      sp.remove('apiClient:port');
+    }
   }
 
   void restoreSettings() async {
