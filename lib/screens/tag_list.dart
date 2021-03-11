@@ -127,17 +127,6 @@ class TagListItemState extends State<TagListItem> {
 
   @override
   Widget build(BuildContext context) {
-    Widget trailing;
-    if (_isLikeLoading) {
-      trailing = const CircularProgressIndicator();
-    } else {
-      trailing = IconButton(
-        icon: widget.tag.like ? const Icon(Icons.favorite, color: Colors.red)
-            : const Icon(Icons.favorite_border),
-        onPressed: _changeLike,
-      );
-    }
-
     // TODO: переусложение - смешивание прослушивания объекта и стейта виджета
     //  вариант рещения - обертка вокруг Tag, включающая isLoading
     return Slidable(
@@ -145,12 +134,26 @@ class TagListItemState extends State<TagListItem> {
       child: ChangeNotifierProvider<Tag>.value(
         value: widget.tag,
         child: Consumer<Tag>(
-          builder: (context, _, __) => ListTile(
-            leading: widget.tag.icon != null ? Text(widget.tag.icon) : null,
-            title: Text(widget.tag.name),
-            trailing: trailing,
-            onTap: _openItem,
-          ),
+          builder: (context, _, __) {
+            Widget trailing;
+            if (_isLikeLoading) {
+              trailing = const CircularProgressIndicator();
+            } else {
+              trailing = IconButton(
+                icon: widget.tag.like ? const Icon(Icons.favorite, color: Colors.red)
+                    : const Icon(Icons.favorite_border),
+                onPressed: _changeLike,
+              );
+            }
+
+            // TODO: не ловит изменения из страницы просмотра
+            return ListTile(
+              leading: widget.tag.icon != null ? Text(widget.tag.icon) : null,
+              title: Text(widget.tag.name),
+              trailing: trailing,
+              onTap: _openItem,
+            );
+          },
         ),
       ),
       actions: [
@@ -179,11 +182,11 @@ class TagListItemState extends State<TagListItem> {
     try {
       await repo.updateItem(widget.tag, {'like': !widget.tag.like});
       widget.tag.update(like: !widget.tag.like);
+      _isLikeLoading = false;
     } on Exception {
       ScaffoldMessenger.of(context).showSnackBar(
         createErrorSnackBar(_changeLike),
       );
-    } finally {
       setState(() {
         _isLikeLoading = false;
       });
@@ -194,6 +197,7 @@ class TagListItemState extends State<TagListItem> {
     await Navigator.of(context).pushNamed('/tag/view', arguments: ItemWithPaginator(
       paginator: widget.paginator,
       item: widget.tag,
+      shouldFetch: false,
     ));
   }
 
@@ -260,7 +264,7 @@ class TagFilterState extends State<TagFilter> {
                 ],
               ),
             ),
-            TextButton(
+            ElevatedButton(
               child: const Text('Сохранить'),
               onPressed: () {},
             ),

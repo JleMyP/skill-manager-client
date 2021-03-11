@@ -9,7 +9,7 @@ Future<void> showSimpleDialog(BuildContext parentContext, String title,
       title: Text(title),
       content: Text(content),
       actions: [
-        TextButton(
+        ElevatedButton(
           child: const Text('ОК'),
           onPressed: () => Navigator.of(parentContext).pop(),
         ),
@@ -27,11 +27,11 @@ Future<bool> showConfirmDialog(BuildContext parentContext, String title,
       title: Text(title),
       content: content != null ? Text(content) : null,
       actions: [
-        TextButton(
+        ElevatedButton(
           child: const Text('Нет'),
           onPressed: () => Navigator.of(parentContext).pop(false),
         ),
-        TextButton(
+        ElevatedButton(
           child: const Text('Да'),
           onPressed: () => Navigator.of(parentContext).pop(true),
         ),

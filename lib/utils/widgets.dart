@@ -18,7 +18,7 @@ class RetryItem extends StatelessWidget {
       child: Column(
         children: [
           const Text('Шот не удалось...'),
-          TextButton(
+          ElevatedButton(
             child: const Text('Повторить'),
             onPressed: retry,
           ),
@@ -42,7 +42,7 @@ class RetryBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text('Шот не удалось...'),
-          TextButton(
+          ElevatedButton(
             child: const Text('Повторить'),
             onPressed: retry,
           ),
@@ -58,6 +58,7 @@ class EmptyBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: в вебе не центрируется по вертикали
     return const Center(child: Text('ниче нету...'));
   }
 }

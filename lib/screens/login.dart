@@ -69,7 +69,7 @@ class LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 30),
             _isLoading ? const BodyLoading()
-                : TextButton(
+                : ElevatedButton(
                   child: const Text('Вход'),
                   onPressed: _login,
                 ),

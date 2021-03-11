@@ -7,8 +7,9 @@ import 'paginators.dart';
 class ItemWithPaginator {
   final LimitOffsetPaginator paginator;
   final BaseModel item;
+  final bool shouldFetch;
 
-  ItemWithPaginator({this.paginator, this.item});
+  ItemWithPaginator({this.paginator, this.item, this.shouldFetch = true});
 }
 
 

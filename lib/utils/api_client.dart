@@ -209,7 +209,7 @@ class HttpApiClient {
   }
 
   void storeSettings() async {
-    var sp = await SharedPreferences.getInstance();
+    final sp = await SharedPreferences.getInstance();
     sp..setString('apiClient:scheme', scheme)
       ..setString('apiClient:host', _host)
       ..setBool('apiClient:fake', fake)

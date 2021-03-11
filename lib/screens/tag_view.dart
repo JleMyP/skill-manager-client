@@ -28,10 +28,16 @@ class TagViewState extends State<TagViewPage> {
     paginator = pair.paginator;
 
     if (future == null) {
-      future = paginator.repo.getDetail(shortItem);
+      if (!pair.shouldFetch) {
+        future = Future.value(shortItem);
+      } else {
+        // TODO: обновлять существующий
+        future = paginator.repo.getDetail(shortItem);
+      }
     }
 
     retry() async => setState(() {
+      // TODO: обновлять существующий
       future = paginator.repo.getDetail(shortItem);
     });
 
@@ -136,6 +142,7 @@ class TagViewLoadedPage extends StatelessWidget {
   }
 
   _edit(BuildContext context) {
+    // TODO: а если лайк грузится?
     Navigator.of(context).pushNamed('/tag/edit', arguments: tag);
   }
 
@@ -159,6 +166,7 @@ class TagViewLoadedPage extends StatelessWidget {
   }
 
   _delete(BuildContext context) async {
+    // TODO: а если лайк грузится?
     final confirm = await showConfirmDialog(context, 'Удалить метку?', tag.name);
 
     if (!confirm) {
