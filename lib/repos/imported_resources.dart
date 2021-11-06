@@ -29,6 +29,7 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
       name: 'ресурс $i',
       description: 'описание ресурса $i',
       isIgnored: i % 2 == 1,
+      typeSpecific: {},
     );
   }
 
