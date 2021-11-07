@@ -265,7 +265,7 @@ class TagFilterState extends State<TagFilter> {
               ),
             ),
             ElevatedButton(
-              child: const Text('Сохранить'),
+              child: const Text('Применить'),
               onPressed: () {},
             ),
           ],

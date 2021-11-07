@@ -60,7 +60,10 @@ class ImportedResourceListState extends State<ImportedResourceListPage> {
           body: SafeArea(
             child: child,
           ),
-          bottomNavigationBar: bs.show ? ConvexBottomBar() : null,
+          endDrawer: Drawer(
+            child: ImportedResourceFilter(),
+          ),
+          // bottomNavigationBar: bs.show ? ConvexBottomBar() : null,
         ),
       ),
     );
@@ -233,5 +236,64 @@ class ConvexBottomBar extends StatelessWidget {
 
   _onItemTapped(SelectedScreenStore screenStore, int newIndex) {
     screenStore.screen = newIndex;
+  }
+}
+
+
+
+class ImportedResourceFilter extends StatefulWidget {
+  @override
+  ImportedResourceFilterState createState() => ImportedResourceFilterState();
+}
+
+
+class ImportedResourceFilterState extends State<ImportedResourceFilter> {
+  final _formKey = GlobalKey<FormState>();
+  int _ignore = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                children: [
+                  DrawerHeader(
+                    child: const Text('Фильтры', style: TextStyle(fontSize: 20)),
+                  ),
+                  DropdownButtonFormField<int>(
+                    decoration: const InputDecoration(labelText: 'Игнор'),
+                    value: _ignore,
+                    onChanged: (newVal) => setState(() => _ignore = newVal),
+                    items: [
+                      DropdownMenuItem(
+                        value: 1,
+                        child: const Text('Да'),
+                      ),
+                      DropdownMenuItem(
+                        value: -1,
+                        child: const Text('Нет'),
+                      ),
+                      DropdownMenuItem(
+                        value: 0,
+                        child: const Text('Пофиг'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              child: const Text('Применить'),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
