@@ -6,8 +6,8 @@ const RESOURCES = {
   "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
-"index.html": "9dfeabac72cf6bc61e20d57be44679d8",
-"/": "9dfeabac72cf6bc61e20d57be44679d8",
+"index.html": "f79b5951bcc4d3b16683e80bca7a607b",
+"/": "f79b5951bcc4d3b16683e80bca7a607b",
 "manifest.json": "da2abbf13082f0ec764013abceece6cb",
 "version.json": "d6950cc0e0bb0ac2451f5d50b0af2551",
 "assets/fonts/MaterialIcons-Regular.otf": "4e6447691c9509f7acdbf8a931a85ca1",
@@ -15,7 +15,7 @@ const RESOURCES = {
 "assets/FontManifest.json": "7b2a36307916a9721811788013e65289",
 "assets/assets/github-logo.svg": "b53ff55e09a092f9f0cbbf74af01b715",
 "assets/AssetManifest.json": "da4c5b4c1747117afe7e58502d2638dc",
-"main.dart.js": "e6d8dc6ad97583fd5369dd4aecea113e"
+"main.dart.js": "7c0879c0f897fac98b5d86b39cc7b084"
 };
 
 // The application shell files that are downloaded before a service worker can
