@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'repos/imported_resources.dart';
-import 'repos/tag.dart';
-import 'repos/user.dart';
-import 'screens/home.dart';
-import 'screens/imported_resource_edit.dart';
-import 'screens/imported_resource_view.dart';
-import 'screens/login.dart';
-import 'screens/settings.dart';
-import 'screens/tag_view.dart';
-import 'utils/api_client.dart';
+import 'data/api_client.dart';
+import 'data/config.dart';
+import 'data/repos/imported_resources.dart';
+import 'data/repos/tag.dart';
+import 'data/repos/user.dart';
+import 'ui/screens/home.dart';
+import 'ui/screens/imported_resource_edit.dart';
+import 'ui/screens/imported_resource_view.dart';
+import 'ui/screens/login.dart';
+import 'ui/screens/settings.dart';
+import 'ui/screens/tag_view.dart';
 
 
 class App extends StatelessWidget {
@@ -52,17 +53,16 @@ void main() {
     MultiProvider(
       providers: [
         Provider(create: (context) => HttpApiClient()),
-        ChangeNotifierProxyProvider<HttpApiClient, UserRepo>(
-          create: (context) => UserRepo(),
-          update: (context, client, repo) => repo!..client = client,
+        ChangeNotifierProvider(create: (context) => Config()..restore()),
+        ChangeNotifierProxyProvider2<HttpApiClient, Config, UserRepo?>(
+          create: (context) => null,
+          update: (context, client, config, repo) => createUserRepo(config, client),
         ),
-        ProxyProvider<HttpApiClient, ImportedResourceRepo>(
-          create: (context) => ImportedResourceRepo(),
-          update: (context, client, repo) => repo!..client = client,
+        ProxyProvider2<HttpApiClient, Config, ImportedResourceRepo>(
+          update: (context, client, config, repo) => createImportedResourceRepo(config, client),
         ),
-        ProxyProvider<HttpApiClient, TagRepo>(
-          create: (context) => TagRepo(),
-          update: (context, client, repo) => repo!..client = client,
+        ProxyProvider2<HttpApiClient, Config, TagRepo>(
+          update: (context, client, config, repo) => createTagRepo(config, client),
         ),
       ],
       child: App(),

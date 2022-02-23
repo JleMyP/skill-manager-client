@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../utils/api_client.dart';
-import '../utils/validators.dart';
+import '../../data/api_client.dart';
+import '../../data/config.dart';
+import '../../utils/validators.dart';
 
 
 class SettingsPage extends StatefulWidget {
@@ -26,12 +27,13 @@ class SettingsPageState extends State<SettingsPage> {
     super.initState();
 
     final client = context.read<HttpApiClient>();
+    final config = context.read<Config>();
     _scheme = client.scheme;
     _hostController.text = client.host;
-    _portController.text = client.port != null ? client.port.toString() : '';
-    _netDelayController.text = client.netDelay.toString();
-    _fake = client.fake;
-    _offline = client.offline;
+    _portController.text = client.port?.toString() ?? '';
+    _netDelayController.text = config.netDelay.toString();
+    _fake = config.fake;
+    _offline = false;
   }
 
   @override
@@ -135,11 +137,13 @@ class SettingsPageState extends State<SettingsPage> {
       scheme: _scheme,
       host: _hostController.text,
       port: _portController.text != '' ? int.parse(_portController.text) : null,
-      fake: _fake,
-      offline: _offline,
-      netDelay: _netDelayController.text != '' ? int.parse(_netDelayController.text) : 0,
     );
     await client.storeSettings();
+    final config = context.read<Config>();
+    config.update(
+      fake: _fake,
+      netDelay: _netDelayController.text != '' ? int.parse(_netDelayController.text) : 0,
+    );
     Navigator.of(context).pop();
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import 'base_model.dart';
-import 'paginators.dart';
+import '../data/base_model.dart';
+import '../data/paginators.dart';
 
 
 class ItemWithPaginator {

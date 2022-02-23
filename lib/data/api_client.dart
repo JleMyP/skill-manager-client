@@ -6,7 +6,10 @@ import 'package:fresh_dio/fresh_dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'logger.dart';
+import '../utils/logger.dart';
+
+
+typedef JsonDict = Map<String, dynamic>;
 
 
 class ApiException implements Exception {
@@ -30,10 +33,10 @@ class JwtTokenPair {
   JwtTokenPair(this.access, this.refresh) {
     final accessDecoded = JwtDecoder.decode(access);
     accessExpire = DateTime.fromMillisecondsSinceEpoch(
-        accessDecoded['exp'] * 1000);
+      accessDecoded['exp'] * 1000);
     final refreshDecoded = JwtDecoder.decode(refresh);
     refreshExpire = DateTime.fromMillisecondsSinceEpoch(
-        refreshDecoded['exp'] * 1000);
+      refreshDecoded['exp'] * 1000);
     // TODO: checks: type, time
   }
 
@@ -46,32 +49,14 @@ class JwtTokenPair {
 }
 
 
-class DelayInterceptor extends Interceptor {
-  int delaySeconds;
-
-  DelayInterceptor(this.delaySeconds);
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    await Future.delayed(Duration(seconds: delaySeconds));
-    super.onRequest(options, handler);
-  }
-}
-
-
 class HttpApiClient {
-  bool fake = true;
-  bool offline = true;
-
   final _authUrl = '/token/';
   final _refreshUrl = '/token/refresh/';
 
   String _scheme = 'http';
   String _host = 'localhost';
   int? _port;
-  int _netDelay = 0;
   late Fresh<OAuth2Token> _refresher;
-  late DelayInterceptor _delayer;
   late Dio _httpClient;
 
   String get scheme => _scheme;
@@ -88,11 +73,6 @@ class HttpApiClient {
   set port(int? value) {
     _port = value;
     _setBaseUrl();
-  }
-  int get netDelay => _netDelay;
-  set netDelay(int value) {
-    _netDelay = value;
-    _delayer.delaySeconds = netDelay;
   }
 
   HttpApiClient({ Dio? client }) {
@@ -111,13 +91,11 @@ class HttpApiClient {
         return JwtTokenPair(response['access'], token.refreshToken!).asOauth();
       },
     );
-    _delayer = DelayInterceptor(_netDelay);
     final logger = createLogger();
 
     _httpClient.interceptors.addAll([
       _refresher,
       HttpFormatter(logger: logger),
-      _delayer,
     ]);
   }
 
@@ -125,17 +103,10 @@ class HttpApiClient {
       required String scheme,
       required String host,
       int? port,
-      required bool fake,
-      required bool offline,
-      required int netDelay,
   }) {
     _scheme = scheme;
     _host = host;
     _port = port;
-    this.fake = fake;
-    this.offline = offline;
-    _netDelay = netDelay;
-    _delayer.delaySeconds = netDelay;
     _setBaseUrl();
   }
 
@@ -144,10 +115,9 @@ class HttpApiClient {
     _httpClient.options.baseUrl = '$scheme://$_host$portString/api/v1';
   }
 
-  Future<void> authenticate(Map<String, dynamic> authData) async {
+  Future<void> authenticate(JsonDict authData) async {
     final response = await post(_authUrl, authData);
-    _refresher.setToken(JwtTokenPair(response['access'],
-        response['refresh']).asOauth());
+    _refresher.setToken(JwtTokenPair(response['access'], response['refresh']).asOauth());
   }
 
   void logout() {
@@ -157,10 +127,7 @@ class HttpApiClient {
   Future<void> storeSettings() async {
     final sp = await SharedPreferences.getInstance();
     sp..setString('apiClient:scheme', scheme)
-      ..setString('apiClient:host', _host)
-      ..setBool('apiClient:fake', fake)
-      ..setBool('apiClient:offline', offline)
-      ..setInt('apiClient:netDelay', _netDelay);
+      ..setString('apiClient:host', _host);
 
     if (_port != null) {
       sp.setInt('apiClient:port', _port!);
@@ -174,15 +141,11 @@ class HttpApiClient {
     _scheme = sharedPreferences.getString('apiClient:scheme') ?? 'http';
     _host = sharedPreferences.getString('apiClient:host') ?? 'localhost';
     _port = sharedPreferences.getInt('apiClient:port');
-    fake = sharedPreferences.getBool('apiClient:fake') ?? true;
-    offline = sharedPreferences.getBool('apiClient:offline') ?? true;
-    _netDelay = sharedPreferences.getInt('apiClient:netDelay') ?? 0;
-    _delayer.delaySeconds = _netDelay;
     _setBaseUrl();
   }
 
-  Future<dynamic> _doRequest(Future<dynamic> Function() func) async {
-    // хня по перевыбрасу ошибки
+  Future _doRequest(Future Function() func) async {
+    // wrap errors
     try {
       return await func();
     } on DioError catch (error) {
@@ -242,28 +205,28 @@ class HttpApiClient {
     }
   }
 
-  Future<dynamic> get(String path, {Map<String, dynamic>? params}) async {
+  Future get(String path, {Map<String, dynamic>? params}) async {
     return await _doRequest(() async {
       final response = await _httpClient.get(path, queryParameters: params);
       return response.data;
     });
   }
 
-  Future<dynamic> post(String path, Map<String, dynamic> data) async {
+  Future post(String path, JsonDict data) async {
     return await _doRequest(() async {
       final response = await _httpClient.post(path, data: data);
       return response.data;
     });
   }
 
-  Future<dynamic> patch(String path, Map<String, dynamic> data) async {
+  Future patch(String path, JsonDict data) async {
     return await _doRequest(() async {
       final response = await _httpClient.patch(path, data: data);
       return response.data;
     });
   }
 
-  Future<dynamic> delete(String path, {Map<String, dynamic>? params}) async {
+  Future delete(String path, {Map<String, dynamic>? params}) async {
     await _doRequest(() async {
       final response = await _httpClient.delete(path, queryParameters: params);
       return response.data;

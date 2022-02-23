@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/imported_resource.dart';
+import '../../data/models/imported_resource.dart';
 
 
 class ImportedResourceEditPage extends StatelessWidget {

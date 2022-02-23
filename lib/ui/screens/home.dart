@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shrink_sidemenu/shrink_sidemenu.dart';
 
-import '../repos/user.dart';
-import '../utils/dialogs.dart';
-import '../utils/store.dart';
+import '../../data/repos/user.dart';
+import '../dialogs.dart';
+import '../store.dart';
 import 'imported_resource_list.dart';
 import 'tag_list.dart';
 
@@ -37,7 +37,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final page = context.watch<SelectedPageStore>().page;
 
-    _bodyKeys.putIfAbsent(page, () => GlobalKey());
+    _bodyKeys.putIfAbsent(page, GlobalKey.new);
     final state = _bodyKeys[page]!;
 
     Widget? body;

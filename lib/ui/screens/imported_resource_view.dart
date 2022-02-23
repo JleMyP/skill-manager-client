@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import '../models/imported_resource.dart';
-import '../utils/web.dart';
+import '../../data/models/imported_resource.dart';
+import '../webview.dart';
 
 
 class ImportedResourceViewPage extends StatelessWidget {

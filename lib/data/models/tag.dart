@@ -1,4 +1,4 @@
-import '../utils/base_model.dart';
+import '../base_model.dart';
 
 
 class TagValue extends BaseModel {

@@ -3,13 +3,13 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
+import '../utils/logger.dart';
 import 'base_model.dart';
 import 'base_repository.dart';
-import 'logger.dart';
 
 
 class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
-  BaseRestRepository<K> repo;
+  AbstractRepository<K> repo;
   int limit;
 
   Map<String, dynamic>? _params;

@@ -3,12 +3,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 
-import '../models/tag.dart';
-import '../repos/tag.dart';
-import '../utils/dialogs.dart';
-import '../utils/paginators.dart';
-import '../utils/store.dart';
-import '../utils/widgets.dart';
+import '../../data/models/tag.dart';
+import '../../data/paginators.dart';
+import '../../data/repos/tag.dart';
+import '../dialogs.dart';
+import '../store.dart';
+import '../widgets.dart';
 
 
 class TagListPage extends StatefulWidget {

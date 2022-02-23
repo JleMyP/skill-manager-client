@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../repos/user.dart';
-import '../utils/api_client.dart';
-import '../utils/dialogs.dart';
-import '../utils/validators.dart';
-import '../utils/widgets.dart';
+import '../../data/api_client.dart';
+import '../../data/config.dart';
+import '../../data/repos/user.dart';
+import '../../utils/validators.dart';
+import '../dialogs.dart';
+import '../widgets.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -106,6 +107,9 @@ class LoginPageState extends State<LoginPage> {
   _restoreAuth() async {
     final client = context.read<HttpApiClient>();
     await client.restoreSettings();
+
+    final config = context.read<Config>();
+    await config.restore();
 
     final sharedPreferences = await SharedPreferences.getInstance();
     _loginController.text = sharedPreferences.getString('auth:login') ?? '';

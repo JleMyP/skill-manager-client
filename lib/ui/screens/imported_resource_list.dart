@@ -5,12 +5,12 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-import '../models/imported_resource.dart';
-import '../repos/imported_resources.dart';
-import '../utils/dialogs.dart';
-import '../utils/paginators.dart';
-import '../utils/store.dart';
-import '../utils/widgets.dart';
+import '../../data/models/imported_resource.dart';
+import '../../data/paginators.dart';
+import '../../data/repos/imported_resources.dart';
+import '../dialogs.dart';
+import '../store.dart';
+import '../widgets.dart';
 
 
 class ImportedResourceListPage extends StatefulWidget {
