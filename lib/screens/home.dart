@@ -56,6 +56,7 @@ class HomePage extends StatelessWidget {
       type: SideMenuType.slideNRotate,
       menu: LeftMenu(_sideMenuTap),
       child: body,
+      radius: BorderRadius.circular(10),
     );
   }
 

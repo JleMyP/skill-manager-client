@@ -18,12 +18,18 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Skill manager',
-      theme: ThemeData.light(),
       darkTheme: ThemeData(
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.green,
+        ),
         brightness: Brightness.dark,
         primarySwatch: Colors.green,
         primaryColor: Colors.green,
-        accentColor: Colors.greenAccent[700],
+        primaryColorDark: Colors.green,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.green,
+          secondary: Colors.greenAccent[700]
+        ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       themeMode: ThemeMode.dark,
@@ -42,22 +48,24 @@ class App extends StatelessWidget {
 
 
 void main() {
-  runApp(MultiProvider(
-    providers: [
-      Provider(create: (context) => HttpApiClient()),
-      ChangeNotifierProxyProvider<HttpApiClient, UserRepo>(
-        create: (context) => UserRepo(),
-        update: (context, client, repo) => repo..client = client,
-      ),
-      ProxyProvider<HttpApiClient, ImportedResourceRepo>(
-        create: (context) => ImportedResourceRepo(),
-        update: (context, client, repo) => repo..client = client,
-      ),
-      ProxyProvider<HttpApiClient, TagRepo>(
-        create: (context) => TagRepo(),
-        update: (context, client, repo) => repo..client = client,
-      ),
-    ],
-    child: App(),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (context) => HttpApiClient()),
+        ChangeNotifierProxyProvider<HttpApiClient, UserRepo>(
+          create: (context) => UserRepo(),
+          update: (context, client, repo) => repo..client = client,
+        ),
+        ProxyProvider<HttpApiClient, ImportedResourceRepo>(
+          create: (context) => ImportedResourceRepo(),
+          update: (context, client, repo) => repo..client = client,
+        ),
+        ProxyProvider<HttpApiClient, TagRepo>(
+          create: (context) => TagRepo(),
+          update: (context, client, repo) => repo..client = client,
+        ),
+      ],
+      child: App(),
+    )
+  );
 }

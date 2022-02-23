@@ -45,7 +45,8 @@ class TagRepo extends BaseRestRepository<Tag> {
       name: 'метка $i',
       orderNum: 1,
       like: false,
-      icon: 'T',
+      createdAt: DateTime.now(),
+      // icon: 'T',
       color: 256,
       targetType: 7,
       values: [
@@ -53,7 +54,7 @@ class TagRepo extends BaseRestRepository<Tag> {
           id: i,
           name: 'значение $i',
           orderNum: 1,
-          icon: 'V',
+          // icon: 'V',
           isDefault: true,
         ),
       ],

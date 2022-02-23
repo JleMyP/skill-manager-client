@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -119,6 +118,7 @@ class PaginatedListView<T extends BaseModel> extends StatelessWidget {
 
           return RefreshIndicator(
             child: ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
               controller: scrollController,
               itemCount: paginator.items.length + (paginator.isEnd ? 0 : 1),
               itemBuilder: _itemBuilder,

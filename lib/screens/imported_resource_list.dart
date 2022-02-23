@@ -132,7 +132,29 @@ class BodyState extends State<Body> {
 
     return Slidable(
       key: ObjectKey(item),
-      actionPane: SlidableDrawerActionPane(),
+      startActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        children: [
+          SlidableAction(
+            label: 'Создать \nресурс',
+            backgroundColor: Colors.green,
+            icon: Icons.add,
+            onPressed: (context) => _createResource(item),
+          ),
+          SlidableAction(
+            label: 'Изменить',
+            backgroundColor: Colors.blue,
+            icon: Icons.edit,
+            onPressed: (context) => _editItem(item),
+          ),
+          SlidableAction(
+            label: 'Удалить',
+            backgroundColor: Colors.red,
+            icon: Icons.delete,
+            onPressed: (context) => _deleteItem(item),
+          ),
+        ],
+      ),
       child: ChangeNotifierProvider<ImportedResource>.value(
         value: item,
         child: Consumer<ImportedResource>(
@@ -149,26 +171,6 @@ class BodyState extends State<Body> {
           ),
         ),
       ),
-      actions: [
-        IconSlideAction(
-          caption: 'Создать \nресурс',
-          color: Colors.green,
-          icon: Icons.add,
-          onTap: () => _createResource(item),
-        ),
-        IconSlideAction(
-          caption: 'Изменить',
-          color: Colors.blue,
-          icon: Icons.edit,
-          onTap: () => _editItem(item),
-        ),
-        IconSlideAction(
-          caption: 'Удалить',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () => _deleteItem(item),
-        ),
-      ],
     );
   }
 
@@ -238,7 +240,6 @@ class ConvexBottomBar extends StatelessWidget {
     screenStore.screen = newIndex;
   }
 }
-
 
 
 class ImportedResourceFilter extends StatefulWidget {

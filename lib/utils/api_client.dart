@@ -52,62 +52,9 @@ class DelayInterceptor extends Interceptor {
   DelayInterceptor(this.delaySeconds);
 
   @override
-  Future onRequest(RequestOptions options) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     await Future.delayed(Duration(seconds: delaySeconds));
-    return options;
-  }
-}
-
-
-class ExceptionWrapInterceptor extends Interceptor {
-  @override
-  Future onError(DioError error) async {
-    if (error.error is SocketException) {
-      return ApiException(
-        message: 'сервер недоступен',
-        originalException: error,
-      );
-    }
-
-    if (error.response == null) {
-      return ApiException(originalException: error);
-    }
-
-    var data = error.response.data;
-    var ct = error.response.headers['content-type'][0];
-    if (ct == null || !ct.contains('application/json')) {
-      return ApiException(
-        rawData: data,
-        originalException: error,
-      );
-    }
-
-    if (data is! Map) {
-      return ApiException(
-        rawData: data,
-        originalException: error,
-      );
-    }
-
-    if (data.containsKey('detail')) {
-      return ApiException(
-        message: data['detail'],
-        rawData: data,
-        originalException: error,
-      );
-    }
-    if (data.containsKey('details') && data['details'][0] is String) {
-      return ApiException(
-        message: (data['details'] as List<String>).join('\n'),
-        rawData: data,
-        originalException: error,
-      );
-    }
-
-    return ApiException(
-      rawData: data,
-      originalException: error,
-    );
+    super.onRequest(options, handler);
   }
 }
 
@@ -155,8 +102,8 @@ class HttpApiClient {
     _refresher = Fresh.oAuth2(
       tokenStorage: InMemoryTokenStorage(),  // TODO: shared preferences
       shouldRefresh: (response) {
-        return response?.request?.path != _authUrl &&
-          response?.request?.path != _refreshUrl &&
+        return response?.requestOptions?.path != _authUrl &&
+          response?.requestOptions?.path != _refreshUrl &&
           (response?.statusCode == 401 || response?.statusCode == 403);
       },
       refreshToken: (token, client) async {
@@ -171,7 +118,6 @@ class HttpApiClient {
       _refresher,
       HttpFormatter(logger: logger),
       _delayer,
-      ExceptionWrapInterceptor(),
     ]);
   }
 
@@ -239,12 +185,60 @@ class HttpApiClient {
     // хня по перевыбрасу ошибки
     try {
       return await func();
-    } on DioError catch (e) {
-      if (e.error is ApiException) {
-        throw e.error;
+    } on DioError catch (error) {
+      if (error.error is SocketException) {
+        var err = ApiException(
+          message: 'сервер недоступен',
+          originalException: error,
+        );
+        throw err;
       }
 
-      rethrow;
+      if (error.response == null) {
+        var err = ApiException(originalException: error);
+        throw err;
+      }
+
+      var data = error.response.data;
+      var ct = error.response.headers['content-type'][0];
+      if (ct == null || !ct.contains('application/json')) {
+        var err = ApiException(
+          rawData: data,
+          originalException: error,
+        );
+        throw err;
+      }
+
+      if (data is! Map) {
+        var err = ApiException(
+          rawData: data,
+          originalException: error,
+        );
+        throw err;
+      }
+
+      if (data.containsKey('detail')) {
+        var err = ApiException(
+          message: data['detail'],
+          rawData: data,
+          originalException: error,
+        );
+        throw err;
+      }
+      if (data.containsKey('details') && data['details'][0] is String) {
+        var err = ApiException(
+          message: (data['details'] as List<String>).join('\n'),
+          rawData: data,
+          originalException: error,
+        );
+        throw err;
+      }
+
+      var err = ApiException(
+        rawData: data,
+        originalException: error,
+      );
+      throw err;
     }
   }
 

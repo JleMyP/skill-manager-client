@@ -130,11 +130,27 @@ class TagListItemState extends State<TagListItem> {
     // TODO: переусложение - смешивание прослушивания объекта и стейта виджета
     //  вариант рещения - обертка вокруг Tag, включающая isLoading
     return Slidable(
-      actionPane: SlidableDrawerActionPane(),
+      startActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        children: [
+          SlidableAction(
+            label: 'Изменить',
+            backgroundColor: Colors.blue,
+            icon: Icons.edit,
+            onPressed: _editItem,
+          ),
+          SlidableAction(
+            label: 'Удалить',
+            backgroundColor: Colors.red,
+            icon: Icons.delete,
+            onPressed: _deleteItem,
+          ),
+        ],
+      ),
       child: ChangeNotifierProvider<Tag>.value(
         value: widget.tag,
         child: Consumer<Tag>(
-          builder: (context, _, __) {
+          builder: (_, __, ___) {
             Widget trailing;
             if (_isLikeLoading) {
               trailing = const CircularProgressIndicator();
@@ -156,20 +172,6 @@ class TagListItemState extends State<TagListItem> {
           },
         ),
       ),
-      actions: [
-        IconSlideAction(
-          caption: 'Изменить',
-          color: Colors.blue,
-          icon: Icons.edit,
-          onTap: _editItem,
-        ),
-        IconSlideAction(
-          caption: 'Удалить',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: _deleteItem,
-        ),
-      ],
     );
   }
 
@@ -201,11 +203,11 @@ class TagListItemState extends State<TagListItem> {
     ));
   }
 
-  _editItem() async {
+  _editItem(BuildContext context) async {
     // await Navigator.of(context).pushNamed('/tag/edit', arguments: widget.tag);
   }
 
-  _deleteItem() async {
+  _deleteItem(BuildContext context) async {
     final confirm = await showConfirmDialog(context, 'Удалить метку?', widget.tag.name);
 
     if (!confirm) {
