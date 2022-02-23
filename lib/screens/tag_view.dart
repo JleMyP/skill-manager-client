@@ -17,14 +17,14 @@ class TagViewPage extends StatefulWidget {
 
 
 class TagViewState extends State<TagViewPage> {
-  Future future;
-  Tag shortItem;
-  LimitOffsetPaginator paginator;
+  Future? future;
+  late Tag shortItem;
+  late LimitOffsetPaginator paginator;
 
   @override
   Widget build(BuildContext context) {
-    final ItemWithPaginator pair = ModalRoute.of(context).settings.arguments;
-    shortItem = pair.item;
+    final pair = ModalRoute.of(context)!.settings.arguments as ItemWithPaginator;
+    shortItem = pair.item as Tag;
     paginator = pair.paginator;
 
     if (future == null) {
@@ -47,7 +47,7 @@ class TagViewState extends State<TagViewPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(
-              leading: shortItem.icon != null ? Text(shortItem.icon) : null,
+              leading: shortItem.icon != null ? Text(shortItem.icon!) : null,
               title: Text(shortItem.name),
             ),
             body: const BodyLoading(),
@@ -57,7 +57,7 @@ class TagViewState extends State<TagViewPage> {
         if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(
-              leading: shortItem.icon != null ? Text(shortItem.icon) : null,
+              leading: shortItem.icon != null ? Text(shortItem.icon!) : null,
               title: Text(shortItem.name),
             ),
             body: RetryBody(retry),
@@ -82,7 +82,12 @@ class TagViewLoadedPage extends StatelessWidget {
 
   final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
-  TagViewLoadedPage({this.tag, this.paginator, this.refresh, Key key}) : super(key: key);
+  TagViewLoadedPage({
+    required this.tag,
+    required this.paginator,
+    required this.refresh,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +98,7 @@ class TagViewLoadedPage extends StatelessWidget {
           key: _scaffoldKey,
           child: Scaffold(
             appBar: AppBar(
-              leading: tag.icon != null ? Text(tag.icon) : null,
+              leading: tag.icon != null ? Text(tag.icon!) : null,
               title: Text(tag.name),
               actions: [
                 IconButton(
@@ -101,7 +106,7 @@ class TagViewLoadedPage extends StatelessWidget {
                   onPressed: () => _edit(context),
                 ),
                 PopupMenuButton(
-                  onSelected: (action) => action(context),
+                  onSelected: (action) => (action as Function)(context),
                   itemBuilder: (_) => [
                     PopupMenuItem(
                       value: _changeLike,
@@ -143,24 +148,24 @@ class TagViewLoadedPage extends StatelessWidget {
 
   _edit(BuildContext context) {
     // TODO: а если лайк грузится?
-    Navigator.of(context).pushNamed('/tag/edit', arguments: tag);
+    // Navigator.of(context).pushNamed('/tag/edit', arguments: tag);
   }
 
   _changeLike(BuildContext context) async {
-    _scaffoldKey.currentState.showSnackBar(
+    _scaffoldKey.currentState!.showSnackBar(
       createLoadingSnackBar(),
     );
     try {
       await paginator.repo.updateItem(tag, {'like': !tag.like});
       tag.update(like: !tag.like);
     } on Exception {
-      _scaffoldKey.currentState.showSnackBar(
+      _scaffoldKey.currentState!.showSnackBar(
         createErrorSnackBar(() => _changeLike(context)),
       );
       return;
     }
 
-    _scaffoldKey.currentState.showSnackBar(
+    _scaffoldKey.currentState!.showSnackBar(
       createSuccessSnackBar(),
     );
   }
@@ -173,19 +178,19 @@ class TagViewLoadedPage extends StatelessWidget {
       return;
     }
 
-    _scaffoldKey.currentState.showSnackBar(
+    _scaffoldKey.currentState!.showSnackBar(
       createLoadingSnackBar(),
     );
     try {
       await paginator.deleteItem(tag);
     } on Exception {
-      _scaffoldKey.currentState.showSnackBar(
+      _scaffoldKey.currentState!.showSnackBar(
         createErrorSnackBar(() => _delete(context)),
       );
       return;
     }
 
-    await Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 }
 
@@ -193,7 +198,7 @@ class TagViewLoadedPage extends StatelessWidget {
 class TagInfo extends StatelessWidget {
   final Tag tag;
 
-  TagInfo({this.tag, Key key}): super(key: key);
+  TagInfo({required this.tag, Key? key}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -238,13 +243,13 @@ class TagInfo extends StatelessWidget {
 class TagValueListItem extends StatelessWidget {
   final TagValue value;
 
-  TagValueListItem({this.value, Key key}): super(key: key);
+  TagValueListItem({required this.value, Key? key}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       key: ObjectKey(value),
-      leading: value.icon != null ? Text(value.icon) : null,
+      leading: value.icon != null ? Text(value.icon!) : null,
       title: Text(value.name),
     );
   }

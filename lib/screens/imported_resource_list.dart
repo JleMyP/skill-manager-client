@@ -16,7 +16,7 @@ import '../utils/widgets.dart';
 class ImportedResourceListPage extends StatefulWidget {
   static const name = 'imported_resource_list_page';
 
-  final Function sideMenuTap;
+  final VoidCallback sideMenuTap;
 
   ImportedResourceListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
@@ -26,8 +26,8 @@ class ImportedResourceListPage extends StatefulWidget {
 
 
 class ImportedResourceListState extends State<ImportedResourceListPage> {
-  SelectedScreenStore _screenStore;
-  BottomBarState _barState;
+  late SelectedScreenStore _screenStore;
+  late BottomBarState _barState;
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class ImportedResourceListState extends State<ImportedResourceListPage> {
             ),
           ),
           body: SafeArea(
-            child: child,
+            child: child!,
           ),
           endDrawer: Drawer(
             child: ImportedResourceFilter(),
@@ -78,8 +78,8 @@ class Body extends StatefulWidget {
 
 
 class BodyState extends State<Body> {
-  int _prevScreen;
-  LimitOffsetPaginator<ImportedResource> _paginator;
+  int? _prevScreen;
+  late LimitOffsetPaginator<ImportedResource> _paginator;
 
   final ScrollController _scrollController = ScrollController();
   final Widget _github = SvgPicture.asset(
@@ -269,7 +269,7 @@ class ImportedResourceFilterState extends State<ImportedResourceFilter> {
                   DropdownButtonFormField<int>(
                     decoration: const InputDecoration(labelText: 'Игнор'),
                     value: _ignore,
-                    onChanged: (newVal) => setState(() => _ignore = newVal),
+                    onChanged: (newVal) => setState(() => _ignore = newVal!),
                     items: [
                       DropdownMenuItem(
                         value: 1,

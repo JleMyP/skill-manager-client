@@ -20,7 +20,7 @@ Future<void> showSimpleDialog(BuildContext parentContext, String title,
 
 
 Future<bool> showConfirmDialog(BuildContext parentContext, String title,
-    String content) async {
+    String? content) async {
   return await showDialog(
     context: parentContext,
     builder: (context) => AlertDialog(

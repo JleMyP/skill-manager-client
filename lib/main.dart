@@ -28,7 +28,7 @@ class App extends StatelessWidget {
         primaryColorDark: Colors.green,
         colorScheme: ColorScheme.dark(
           primary: Colors.green,
-          secondary: Colors.greenAccent[700]
+          secondary: Colors.greenAccent[700]!,
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -54,15 +54,15 @@ void main() {
         Provider(create: (context) => HttpApiClient()),
         ChangeNotifierProxyProvider<HttpApiClient, UserRepo>(
           create: (context) => UserRepo(),
-          update: (context, client, repo) => repo..client = client,
+          update: (context, client, repo) => repo!..client = client,
         ),
         ProxyProvider<HttpApiClient, ImportedResourceRepo>(
           create: (context) => ImportedResourceRepo(),
-          update: (context, client, repo) => repo..client = client,
+          update: (context, client, repo) => repo!..client = client,
         ),
         ProxyProvider<HttpApiClient, TagRepo>(
           create: (context) => TagRepo(),
-          update: (context, client, repo) => repo..client = client,
+          update: (context, client, repo) => repo!..client = client,
         ),
       ],
       child: App(),

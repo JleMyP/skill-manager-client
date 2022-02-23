@@ -12,39 +12,39 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   BaseRestRepository<K> repo;
   int limit;
 
-  Map<String, dynamic> _params;
-  List<K> _items;
+  Map<String, dynamic>? _params;
+  List<K>? _items;
 
   bool _isLoading = false;
   bool _isFailed = false;
-  int _count;
-  Logger _logger;
+  int? _count;
+  late Logger _logger;
 
   LimitOffsetPaginator({
-      @required this.repo,
+      required this.repo,
       this.limit = 25,
-      Logger logger,
+      Logger? logger,
   }) {
     _logger = logger ?? createLogger();
   }
 
-  UnmodifiableListView<K> get items => UnmodifiableListView(_items);
+  UnmodifiableListView<K> get items => UnmodifiableListView(_items!);
 
-  int get count => _count;
+  int? get count => _count;
   bool get isConnected => _count != null;
   bool get isNotConnected => !isConnected;
-  bool get isEnd => isConnected && _items.length >= _count;
+  bool get isEnd => isConnected && _items!.length >= _count!;
   bool get isLoading => _isLoading;
   bool get isFailed => _isFailed;
   bool get isEmpty => isConnected && items.isEmpty;
 
-  void setParams(Map<String, dynamic> params) {
+  void setParams(Map<String, dynamic>? params) {
     _params = params;
     _items?.clear();
     _count = null;
 
     if (_params != null) {
-      _params['limit'] = limit;
+      _params!['limit'] = limit;
     }
   }
 
@@ -70,7 +70,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
         'offset': 0,
       };
     } else {
-      _params['offset'] = _items.length;
+      _params!['offset'] = _items!.length;
     }
 
     _isFailed = false;
@@ -92,12 +92,12 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
       return;
     }
 
-    _count = pair.meta == null ? pair.result.length : pair.meta['count'];
+    _count = pair.meta?['count'] ?? pair.result.length;
     if (_items == null) {
       _items = pair.result;
     } else {
       // TODO: отфильтровать дубли
-      _items.addAll(pair.result);
+      _items!.addAll(pair.result);
     }
     _isLoading = false;
     notifyListeners();
@@ -107,8 +107,8 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   Future<void> deleteItem(K item) async {
     _logger.v('deleting item $item');
     await repo.deleteItem(item);
-    _items.remove(item);
-    _count -= 1;
+    _items!.remove(item);
+    _count = count! - 1;
     notifyListeners();
   }
 }

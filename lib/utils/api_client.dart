@@ -10,22 +10,22 @@ import 'logger.dart';
 
 
 class ApiException implements Exception {
-  String message;
+  String? message;
   dynamic rawData;
-  Exception originalException;
+  Exception? originalException;
 
   ApiException({this.message, this.rawData, this.originalException});
 
   @override
-  String toString() => message ?? originalException?.toString();
+  String toString() => message ?? originalException?.toString() ?? '';
 }
 
 
 class JwtTokenPair {
   String access;
   String refresh;
-  DateTime accessExpire;
-  DateTime refreshExpire;
+  late DateTime accessExpire;
+  late DateTime refreshExpire;
 
   JwtTokenPair(this.access, this.refresh) {
     final accessDecoded = JwtDecoder.decode(access);
@@ -68,11 +68,11 @@ class HttpApiClient {
 
   String _scheme = 'http';
   String _host = 'localhost';
-  int _port;
+  int? _port;
   int _netDelay = 0;
-  Fresh<OAuth2Token> _refresher;
-  DelayInterceptor _delayer;
-  Dio _httpClient;
+  late Fresh<OAuth2Token> _refresher;
+  late DelayInterceptor _delayer;
+  late Dio _httpClient;
 
   String get scheme => _scheme;
   set scheme(String value) {
@@ -84,8 +84,8 @@ class HttpApiClient {
     _host = value;
     _setBaseUrl();
   }
-  int get port => _port;
-  set port(int value) {
+  int? get port => _port;
+  set port(int? value) {
     _port = value;
     _setBaseUrl();
   }
@@ -95,20 +95,20 @@ class HttpApiClient {
     _delayer.delaySeconds = netDelay;
   }
 
-  HttpApiClient({ Dio client }) {
+  HttpApiClient({ Dio? client }) {
     _httpClient = client ?? Dio();
     _setBaseUrl();
 
     _refresher = Fresh.oAuth2(
       tokenStorage: InMemoryTokenStorage(),  // TODO: shared preferences
       shouldRefresh: (response) {
-        return response?.requestOptions?.path != _authUrl &&
-          response?.requestOptions?.path != _refreshUrl &&
+        return response?.requestOptions.path != _authUrl &&
+          response?.requestOptions.path != _refreshUrl &&
           (response?.statusCode == 401 || response?.statusCode == 403);
       },
       refreshToken: (token, client) async {
-        final response = await post(_refreshUrl, {'refresh': token.refreshToken});
-        return JwtTokenPair(response['access'], token.refreshToken).asOauth();
+        final response = await post(_refreshUrl, {'refresh': token!.refreshToken});
+        return JwtTokenPair(response['access'], token.refreshToken!).asOauth();
       },
     );
     _delayer = DelayInterceptor(_netDelay);
@@ -122,12 +122,12 @@ class HttpApiClient {
   }
 
   void configure({
-      String scheme,
-      String host,
-      int port,
-      bool fake,
-      bool offline,
-      int netDelay,
+      required String scheme,
+      required String host,
+      int? port,
+      required bool fake,
+      required bool offline,
+      required int netDelay,
   }) {
     _scheme = scheme;
     _host = host;
@@ -144,7 +144,7 @@ class HttpApiClient {
     _httpClient.options.baseUrl = '$scheme://$_host$portString/api/v1';
   }
 
-  void authenticate(Map<String, dynamic> authData) async {
+  Future<void> authenticate(Map<String, dynamic> authData) async {
     final response = await post(_authUrl, authData);
     _refresher.setToken(JwtTokenPair(response['access'],
         response['refresh']).asOauth());
@@ -154,7 +154,7 @@ class HttpApiClient {
     _refresher.clearToken();
   }
 
-  void storeSettings() async {
+  Future<void> storeSettings() async {
     final sp = await SharedPreferences.getInstance();
     sp..setString('apiClient:scheme', scheme)
       ..setString('apiClient:host', _host)
@@ -163,13 +163,13 @@ class HttpApiClient {
       ..setInt('apiClient:netDelay', _netDelay);
 
     if (_port != null) {
-      sp.setInt('apiClient:port', _port);
+      sp.setInt('apiClient:port', _port!);
     } else {
       sp.remove('apiClient:port');
     }
   }
 
-  void restoreSettings() async {
+  Future<void> restoreSettings() async {
     final sharedPreferences = await SharedPreferences.getInstance();
     _scheme = sharedPreferences.getString('apiClient:scheme') ?? 'http';
     _host = sharedPreferences.getString('apiClient:host') ?? 'localhost';
@@ -199,8 +199,8 @@ class HttpApiClient {
         throw err;
       }
 
-      var data = error.response.data;
-      var ct = error.response.headers['content-type'][0];
+      var data = error.response?.data;
+      var ct = error.response?.headers['content-type']?[0];
       if (ct == null || !ct.contains('application/json')) {
         var err = ApiException(
           rawData: data,
@@ -242,7 +242,7 @@ class HttpApiClient {
     }
   }
 
-  Future<dynamic> get(String path, {Map<String, dynamic> params}) async {
+  Future<dynamic> get(String path, {Map<String, dynamic>? params}) async {
     return await _doRequest(() async {
       final response = await _httpClient.get(path, queryParameters: params);
       return response.data;
@@ -263,7 +263,7 @@ class HttpApiClient {
     });
   }
 
-  Future<dynamic> delete(String path, {Map<String, dynamic> params}) async {
+  Future<dynamic> delete(String path, {Map<String, dynamic>? params}) async {
     await _doRequest(() async {
       final response = await _httpClient.delete(path, queryParameters: params);
       return response.data;

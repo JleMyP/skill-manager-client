@@ -4,24 +4,28 @@ import 'base_model.dart';
 
 class ResultAndMeta<T> {
   List<T> result;
-  Map<String, dynamic> meta;
+  Map<String, dynamic>? meta;
 
   ResultAndMeta(this.result, this.meta);
 }
 
 
 abstract class BaseRestRepository<T extends BaseModel> {
-  HttpApiClient client;
-  String resultKey;
+  late HttpApiClient client;
+  String? resultKey;
 
-  BaseRestRepository({this.client, this.resultKey});
+  BaseRestRepository({client, this.resultKey}) {
+    if (client != null) {
+      this.client = client;
+    }
+  }
 
   String get baseUrl;
   int get fakeListCount => 30;
 
-  Future<ResultAndMeta<T>> getList({Map<String, dynamic> params}) async {
+  Future<ResultAndMeta<T>> getList({Map<String, dynamic>? params}) async {
     List<T> list;
-    Map<String, dynamic> meta;
+    Map<String, dynamic>? meta;
 
     if (client.fake) {
       if (client.netDelay != 0) {  // TODO: дублируется
@@ -38,7 +42,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
       if (resultKey != null) {
         meta = response;
         rawList = response[resultKey].cast<Map<String, dynamic>>();
-        meta.remove(resultKey);
+        meta!.remove(resultKey);
       } else {
         rawList = response.cast<Map<String, dynamic>>();
       }
@@ -52,7 +56,7 @@ abstract class BaseRestRepository<T extends BaseModel> {
     return ResultAndMeta<T>(list, meta);
   }
 
-  Future<T> getDetailById(int itemId) async {
+  Future<T?> getDetailById(int itemId) async {
     T item;
 
     if (client.fake) {
@@ -102,8 +106,8 @@ abstract class BaseRestRepository<T extends BaseModel> {
     }
   }
 
-  Future<T> updateItemById(int itemId, Map<String, dynamic> data) async {
-    T newItem;
+  Future<T?> updateItemById(int itemId, Map<String, dynamic> data) async {
+    T? newItem;
 
     if (client.fake) {
       if (client.netDelay != 0) {
@@ -118,8 +122,8 @@ abstract class BaseRestRepository<T extends BaseModel> {
     return newItem;
   }
 
-  Future<T> updateItem(T item, Map<String, dynamic> data) async {
-    T newItem;
+  Future<T?> updateItem(T item, Map<String, dynamic> data) async {
+    T? newItem;
 
     if (client.fake) {
       if (client.netDelay != 0) {

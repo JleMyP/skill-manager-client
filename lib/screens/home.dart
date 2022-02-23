@@ -38,9 +38,9 @@ class HomePage extends StatelessWidget {
     final page = context.watch<SelectedPageStore>().page;
 
     _bodyKeys.putIfAbsent(page, () => GlobalKey());
-    final state = _bodyKeys[page];
+    final state = _bodyKeys[page]!;
 
-    Widget body;
+    Widget? body;
     switch (page) {
       case ImportedResourceListPage.name:
         body = ImportedResourceListPage(_sideMenuTap, state);
@@ -55,13 +55,17 @@ class HomePage extends StatelessWidget {
       key: _sideMenuKey,
       type: SideMenuType.slideNRotate,
       menu: LeftMenu(_sideMenuTap),
-      child: body,
+      child: body ?? Container(),
       radius: BorderRadius.circular(10),
     );
   }
 
   _sideMenuTap() {
     final state = _sideMenuKey.currentState;
+
+    if (state == null) {
+      return;
+    }
 
     if (state.isOpened) {
       state.closeSideMenu();

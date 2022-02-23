@@ -5,16 +5,16 @@ class TagValue extends BaseModel {
   final String name;
   final int orderNum;
   final DateTime createdAt;
-  final String icon;
+  final String? icon;
   final bool isDefault;
 
   TagValue({
-    id,
-    this.name,
-    this.orderNum,
-    this.createdAt,
+    required id,
+    required this.name,
+    required this.orderNum,
+    required this.createdAt,
     this.icon,
-    this.isDefault,
+    required this.isDefault,
   }): super(id: id);
 }
 
@@ -24,25 +24,25 @@ class Tag extends BaseModel {
   int orderNum;
   bool like;
   DateTime createdAt;
-  String icon;
-  int color;
+  String? icon;
+  int? color;
   int targetType;
   List<TagValue> values;
 
   Tag({
     id,
-    this.name,
-    this.orderNum,
-    this.like,
-    this.createdAt,
+    required this.name,
+    required this.orderNum,
+    required this.like,
+    required this.createdAt,
     this.icon,
     this.color,
-    this.targetType,
-    this.values,
+    required this.targetType,
+    required this.values,
   }): super(id: id);
 
-  void update({bool like}) {
-    if (this.like != like) {
+  void update({bool? like}) {
+    if (like != null && this.like != like) {
       this.like = like;
       notifyListeners();
     }

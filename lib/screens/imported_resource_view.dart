@@ -8,16 +8,16 @@ import '../utils/web.dart';
 class ImportedResourceViewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final ImportedResource item = ModalRoute.of(context).settings.arguments;
-    String content = item.typeSpecific['readme'];
+    final item = ModalRoute.of(context)!.settings.arguments as ImportedResource;
+    String? content = item.typeSpecific['readme'];
     Widget child;
     if (content == null) {
-      child = Text(item.description);
+      child = Text(item.description!);
     } else {
       child = Markdown(
         data: content,
         onTapLink: (text, href, title) {
-          if (!href.startsWith('#')) openWeb(context, href);
+          if (!href!.startsWith('#')) openWeb(context, href);
         },
       );
     }
@@ -33,7 +33,7 @@ class ImportedResourceViewPage extends StatelessWidget {
             onPressed: () => _edit(context, item),
           ),
           PopupMenuButton(
-            onSelected: (action) => action(item),
+            onSelected: (action) => (action as Function)(item),
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: _ignore,

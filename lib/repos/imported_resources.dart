@@ -6,7 +6,7 @@ import '../utils/base_repository.dart';
 class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
   String get baseUrl => '/imported_resources/';
 
-  ImportedResourceRepo({ HttpApiClient client }):
+  ImportedResourceRepo({ HttpApiClient? client }):
     super(client: client, resultKey: 'results');
 
   @override
@@ -36,7 +36,7 @@ class ImportedResourceRepo extends BaseRestRepository<ImportedResource> {
   }
 
   @override
-  Future<ImportedResource> updateItem(ImportedResource item, Map<String, dynamic> data) async {
+  Future<ImportedResource?> updateItem(ImportedResource item, Map<String, dynamic> data) async {
     data['resourcetype'] = item.type;
     return await super.updateItem(item, data);
   }

@@ -56,16 +56,17 @@ class TagRepo extends BaseRestRepository<Tag> {
           orderNum: 1,
           // icon: 'V',
           isDefault: true,
+          createdAt: DateTime.now(),
         ),
       ],
     );
   }
 
   Future<TagValue> addValue({
-    int tagId,
-    String name,
-    int orderNum,
-    String icon,
+    required int tagId,
+    required String name,
+    required int orderNum,
+    required String icon,
   }) async {
     if (client.fake) {
       if (client.netDelay != 0) {

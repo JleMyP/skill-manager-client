@@ -6,14 +6,14 @@ import '../models/imported_resource.dart';
 class ImportedResourceEditPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final ImportedResource item = ModalRoute.of(context).settings.arguments;
+    final item = ModalRoute.of(context)!.settings.arguments as ImportedResource;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(item.name),
       ),
       body: SafeArea(
-        child: Text(item.description),
+        child: Text(item.description ?? ''),
       ),
     );
   }

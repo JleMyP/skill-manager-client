@@ -9,7 +9,11 @@ class ItemWithPaginator {
   final BaseModel item;
   final bool shouldFetch;
 
-  ItemWithPaginator({this.paginator, this.item, this.shouldFetch = true});
+  ItemWithPaginator({
+    required this.paginator,
+    required this.item,
+    this.shouldFetch = true,
+  });
 }
 
 

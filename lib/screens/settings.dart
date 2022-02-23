@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -18,9 +17,9 @@ class SettingsPageState extends State<SettingsPage> {
   final _hostController = TextEditingController();
   final _portController = TextEditingController();
   final _netDelayController = TextEditingController();
-  String _scheme;
-  bool _fake;
-  bool _offline;
+  late String _scheme;
+  late bool _fake;
+  late bool _offline;
 
   @override
   void initState() {
@@ -29,7 +28,7 @@ class SettingsPageState extends State<SettingsPage> {
     final client = context.read<HttpApiClient>();
     _scheme = client.scheme;
     _hostController.text = client.host;
-    _portController.text = client.port != null ? client.port.toString() : null;
+    _portController.text = client.port != null ? client.port.toString() : '';
     _netDelayController.text = client.netDelay.toString();
     _fake = client.fake;
     _offline = client.offline;
@@ -77,7 +76,7 @@ class SettingsPageState extends State<SettingsPage> {
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: 'Протокол'),
               value: _scheme,
-              onChanged: (newVal) => setState(() => _scheme = newVal),
+              onChanged: (newVal) => setState(() => _scheme = newVal!),
               items: [
                 DropdownMenuItem(
                   value: 'http',
@@ -127,7 +126,7 @@ class SettingsPageState extends State<SettingsPage> {
   }
 
   _save() async {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 

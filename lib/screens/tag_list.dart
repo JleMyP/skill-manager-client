@@ -14,7 +14,7 @@ import '../utils/widgets.dart';
 class TagListPage extends StatefulWidget {
   static const name = 'tag_list_page';
 
-  final Function sideMenuTap;
+  final VoidCallback sideMenuTap;
 
   TagListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
@@ -24,7 +24,7 @@ class TagListPage extends StatefulWidget {
 
 
 class TagListState extends State<TagListPage> {
-  ButtonState _buttonState;
+  late ButtonState _buttonState;
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class TagListState extends State<TagListPage> {
             ),
           ),
           body: SafeArea(
-            child: child,
+            child: child!,
           ),
           endDrawer: Drawer(
             child: TagFilter(),
@@ -69,7 +69,7 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   final ScrollController _scrollController = ScrollController();
-  LimitOffsetPaginator<Tag> paginator;
+  late LimitOffsetPaginator<Tag> paginator;
 
   @override
   void initState() {
@@ -115,7 +115,11 @@ class TagListItem extends StatefulWidget {
   final Tag tag;
   final LimitOffsetPaginator<Tag> paginator;
 
-  TagListItem({this.tag, this.paginator, Key key}) : super(key: key);
+  TagListItem({
+    required this.tag,
+    required this.paginator,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<TagListItem> createState() => TagListItemState();
@@ -164,7 +168,7 @@ class TagListItemState extends State<TagListItem> {
 
             // TODO: не ловит изменения из страницы просмотра
             return ListTile(
-              leading: widget.tag.icon != null ? Text(widget.tag.icon) : null,
+              leading: widget.tag.icon != null ? Text(widget.tag.icon!) : null,
               title: Text(widget.tag.name),
               trailing: trailing,
               onTap: _openItem,
@@ -247,7 +251,7 @@ class TagFilterState extends State<TagFilter> {
                   DropdownButtonFormField<int>(
                     decoration: const InputDecoration(labelText: 'Лайк'),
                     value: _like,
-                    onChanged: (newVal) => setState(() => _like = newVal),
+                    onChanged: (newVal) => setState(() => _like = newVal!),
                     items: [
                       DropdownMenuItem(
                         value: 1,

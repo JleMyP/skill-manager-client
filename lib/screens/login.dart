@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -80,7 +79,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _login() async {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -88,8 +87,10 @@ class LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await userRepo.authenticate(_loginController.text,
-          _passwordController.text);
+      await userRepo.authenticate(
+        _loginController.text,
+        _passwordController.text,
+      );
       await _storeAuth();
       await Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
     } on Exception catch (e) {
@@ -107,12 +108,12 @@ class LoginPageState extends State<LoginPage> {
     await client.restoreSettings();
 
     final sharedPreferences = await SharedPreferences.getInstance();
-    _loginController.text = sharedPreferences.getString('auth:login');
-    _passwordController.text = sharedPreferences.getString('auth:password');
+    _loginController.text = sharedPreferences.getString('auth:login') ?? '';
+    _passwordController.text = sharedPreferences.getString('auth:password') ?? '';
     final autoLogin = sharedPreferences.getBool('auth:autoLogin') ?? false;
 
-    if (autoLogin && _loginController.text != null &&
-        _passwordController.text != null) {
+    if (autoLogin && _loginController.text != '' &&
+        _passwordController.text != '') {
       await _login();
     }
   }

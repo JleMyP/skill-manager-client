@@ -53,7 +53,7 @@ class RetryBody extends StatelessWidget {
 
 
 class EmptyBody extends StatelessWidget {
-  const EmptyBody({ Key key }) : super(key: key);
+  const EmptyBody({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class EmptyBody extends StatelessWidget {
 
 
 class BodyLoading extends StatelessWidget {
-  const BodyLoading({ Key key }) : super(key: key);
+  const BodyLoading({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,7 @@ class BodyLoading extends StatelessWidget {
 
 
 class ItemLoading extends StatelessWidget {
-  const ItemLoading({ Key key }) : super(key: key);
+  const ItemLoading({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +92,7 @@ typedef ItemBuilder<T> = Widget Function(BuildContext context, T item);
 
 
 class PaginatedListView<T extends BaseModel> extends StatelessWidget {
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
   final LimitOffsetPaginator<T> paginator;
   final ItemBuilder<T> itemBuilder;
 
