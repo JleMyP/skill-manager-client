@@ -14,7 +14,7 @@ import '../widgets.dart';
 class TagListPage extends StatefulWidget {
   static const name = 'tag_list_page';
 
-  final VoidCallback sideMenuTap;
+  final VoidCallback? sideMenuTap;
 
   TagListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
@@ -41,10 +41,10 @@ class TagListState extends State<TagListPage> {
         builder: (context, _bs, child) => Scaffold(
           appBar: AppBar(
             title: const Text('Метки'),
-            leading: IconButton(
+            leading: widget.sideMenuTap != null ? IconButton(
               icon: const Icon(Icons.menu),
               onPressed: widget.sideMenuTap,
-            ),
+            ) : null,
           ),
           body: SafeArea(
             child: child!,

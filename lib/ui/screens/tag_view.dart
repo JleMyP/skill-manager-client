@@ -9,7 +9,6 @@ import '../store.dart';
 import '../widgets.dart';
 
 
-
 class TagViewPage extends StatefulWidget {
   @override
   TagViewState createState() => TagViewState();
@@ -111,7 +110,7 @@ class TagViewLoadedPage extends StatelessWidget {
                     PopupMenuItem(
                       value: _changeLike,
                       child: tag.like ? const Text('Дизлайк')
-                          : const Text('Лайк'),
+                        : const Text('Лайк'),
                     ),
                     PopupMenuItem(
                       value: _delete,

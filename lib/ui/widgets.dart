@@ -116,6 +116,7 @@ class PaginatedListView<T extends BaseModel> extends StatelessWidget {
             return RetryBody(paginator.fetchNext);
           }
 
+          // todo: not work on linux
           return RefreshIndicator(
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),

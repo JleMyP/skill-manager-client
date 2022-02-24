@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:logger_flutter/logger_flutter.dart';
 import 'package:provider/provider.dart';
@@ -39,22 +41,30 @@ class HomePage extends StatelessWidget {
 
     _bodyKeys.putIfAbsent(page, GlobalKey.new);
     final state = _bodyKeys[page]!;
+    final tapCallback = Platform.isLinux ? null : _sideMenuTap;
 
     Widget? body;
     switch (page) {
       case ImportedResourceListPage.name:
-        body = ImportedResourceListPage(_sideMenuTap, state);
+        body = ImportedResourceListPage(tapCallback, state);
         break;
       case TagListPage.name:
-        body = TagListPage(_sideMenuTap, state);
+        body = TagListPage(tapCallback, state);
         break;
+    }
+
+    if (Platform.isLinux) {
+      return Row(children: [
+        Drawer(child: LeftMenu()),
+        Expanded(child: body ?? Container()),
+      ]);
     }
 
     return SideMenu(
       background: Theme.of(context).dialogBackgroundColor,
       key: _sideMenuKey,
       type: SideMenuType.slideNRotate,
-      menu: LeftMenu(_sideMenuTap),
+      menu: LeftMenu(tapCallback),
       child: body ?? Container(),
       radius: BorderRadius.circular(10),
     );
@@ -77,9 +87,9 @@ class HomePage extends StatelessWidget {
 
 
 class LeftMenu extends StatelessWidget {
-  final Function sideMenuTap;
+  final Function? sideMenuTap;
 
-  LeftMenu(this.sideMenuTap);
+  LeftMenu([this.sideMenuTap]);
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +102,7 @@ class LeftMenu extends StatelessWidget {
           title: const Text('Импортированные ресурсы'),
           onTap: () {
             store.page = ImportedResourceListPage.name;
-            sideMenuTap();
+            if (sideMenuTap != null) sideMenuTap!();
           },
         ),
         ListTile(
@@ -132,7 +142,7 @@ class LeftMenu extends StatelessWidget {
           title: const Text('Метки'),
           onTap: () {
             store.page = TagListPage.name;
-            sideMenuTap();
+            if (sideMenuTap != null) sideMenuTap!();
           },
         ),
         const Divider(height: 50),

@@ -139,38 +139,41 @@ abstract class BaseDelayWrapper<T extends AbstractRepository<I>, I extends BaseM
   BaseDelayWrapper(this.repo, this._netDelay);
 
   Future<void> delay() async {
-  	await Future.delayed(Duration(seconds: _netDelay));
+    await Future.delayed(Duration(seconds: _netDelay));
   }
 
   Future<ResultAndMeta<I>> getList({Map<String, dynamic>? params}) async {
-  	await delay();
-  	return await repo.getList(params: params);
+    await delay();
+    return await repo.getList(params: params);
   }
 
   Future<I?> getDetailById(int itemId) async {
-  	await delay();
-  	return await repo.getDetailById(itemId);
+    await delay();
+    return await repo.getDetailById(itemId);
   }
 
   Future<I?> getDetail(I item) async {
-  	return await getDetailById(item.id);
+    await delay();
+    return await repo.getDetail(item);
   }
 
   Future<void> deleteItemById(int itemId) async {
-  	await delay();
-  	await repo.deleteItemById(itemId);
+    await delay();
+    await repo.deleteItemById(itemId);
   }
 
   Future<void> deleteItem(I item) async {
-  	await deleteItemById(item.id);
+    await delay();
+    await repo.deleteItem(item);
   }
 
   Future<I> updateItemById(int id, JsonDict data) async {
-  	await delay();
-  	return await repo.updateItemById(id, data);
+    await delay();
+    return await repo.updateItemById(id, data);
   }
 
   Future<I> updateItem(I item, JsonDict data) async {
-  	return updateItemById(item.id, data);
+    await delay();
+    return await repo.updateItem(item, data);
   }
 }

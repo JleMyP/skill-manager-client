@@ -22,7 +22,7 @@ class TagHttpRepo extends BaseHttpRepository<Tag> implements TagRepo {
 
   @override
   Tag parseItemFromList(JsonDict item) {
-    var values = item['values'].map(parseTagValueFromList).cast<TagValue>().toList();
+    var values = item['values'].map((i) => parseTagValueFromList(i)).cast<TagValue>().toList();
     return Tag(
       id: item['id'],
       name: item['name'],

@@ -1,4 +1,7 @@
+import 'dart:io' show Platform;
+
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -13,10 +16,22 @@ import '../store.dart';
 import '../widgets.dart';
 
 
+final _github = SvgPicture.asset(
+  'assets/github-logo.svg',
+  width: 30,
+  alignment: Alignment.centerLeft,
+  color: Colors.grey,
+);
+
+final typeMap = {
+  'ImportedResourceRepo': _github,
+};
+
+
 class ImportedResourceListPage extends StatefulWidget {
   static const name = 'imported_resource_list_page';
 
-  final VoidCallback sideMenuTap;
+  final VoidCallback? sideMenuTap;
 
   ImportedResourceListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
@@ -52,10 +67,10 @@ class ImportedResourceListState extends State<ImportedResourceListPage> {
         builder: (context, bs, child) => Scaffold(
           appBar: AppBar(
             title: const Text('Импортированные ресурсы'),
-            leading: IconButton(
+            leading: widget.sideMenuTap != null ? IconButton(
               icon: const Icon(Icons.menu),
               onPressed: widget.sideMenuTap,
-            ),
+            ) : null,
           ),
           body: SafeArea(
             child: child!,
@@ -82,12 +97,6 @@ class BodyState extends State<Body> {
   late LimitOffsetPaginator<ImportedResource> _paginator;
 
   final ScrollController _scrollController = ScrollController();
-  final Widget _github = SvgPicture.asset(
-    'assets/github-logo.svg',
-    width: 30,
-    alignment: Alignment.centerLeft,
-    color: Colors.grey,
-  );
 
   @override
   void initState() {
@@ -124,53 +133,11 @@ class BodyState extends State<Body> {
     return PaginatedListView(_paginator, _buildListItem, _scrollController);
   }
 
-  Widget _buildListItem(BuildContext context, dynamic _item) {
-    final item = _item as ImportedResource;
-    final typeMap = <String, Widget>{
-      'ImportedResourceRepo': _github,
-    };
-
-    return Slidable(
+  Widget _buildListItem(BuildContext context, ImportedResource item) {
+    return ImportedResourceListItem(
+      importedResource: item,
+      paginator: _paginator,
       key: ObjectKey(item),
-      startActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        children: [
-          SlidableAction(
-            label: 'Создать \nресурс',
-            backgroundColor: Colors.green,
-            icon: Icons.add,
-            onPressed: (context) => _createResource(item),
-          ),
-          SlidableAction(
-            label: 'Изменить',
-            backgroundColor: Colors.blue,
-            icon: Icons.edit,
-            onPressed: (context) => _editItem(item),
-          ),
-          SlidableAction(
-            label: 'Удалить',
-            backgroundColor: Colors.red,
-            icon: Icons.delete,
-            onPressed: (context) => _deleteItem(item),
-          ),
-        ],
-      ),
-      child: ChangeNotifierProvider<ImportedResource>.value(
-        value: item,
-        child: Consumer<ImportedResource>(
-          builder: (context, changedItem, child) => ListTile(
-            leading: typeMap[changedItem.type],
-            title: Text(changedItem.name),
-            subtitle: Text(changedItem.description ?? ''),
-            trailing: IconButton(
-              icon: Icon(changedItem.isIgnored ? Icons.visibility_off : Icons.visibility),
-              color: Colors.grey,
-              onPressed: () => _changeIgnore(changedItem),
-            ),
-            onTap: () => _openItem(changedItem),
-          ),
-        ),
-      ),
     );
   }
 
@@ -183,39 +150,163 @@ class BodyState extends State<Body> {
       buttonState.show = true;
     }
   }
+}
 
-  _createResource(ImportedResource item) async {
+
+class ImportedResourceListItem extends StatefulWidget {
+  final ImportedResource importedResource;
+  final LimitOffsetPaginator<ImportedResource> paginator;
+
+  ImportedResourceListItem({
+    required this.importedResource,
+    required this.paginator,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<ImportedResourceListItem> createState() => ImportedResourceListItemState();
+}
+
+
+class ImportedResourceListItemState extends State<ImportedResourceListItem> {
+  bool _isIgnoreLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final wrappedItem = ChangeNotifierProvider<ImportedResource>.value(
+      value: widget.importedResource,
+      child: Consumer<ImportedResource>(
+        builder: (context, changedItem, child) {
+          Widget trailing;
+          if (_isIgnoreLoading) {
+            trailing = const CircularProgressIndicator();
+          } else {
+            trailing = IconButton(
+              icon: Icon(changedItem.isIgnored ? Icons.visibility_off : Icons.visibility),
+              color: Colors.grey,
+              onPressed: _changeIgnore,
+              tooltip: changedItem.isIgnored ? 'Разигнорить' : 'Заигнорить',
+            );
+          }
+
+          final tile = ListTile(
+            leading: typeMap[changedItem.type],
+            title: Text(changedItem.name),
+            subtitle: Text(changedItem.description ?? ''),
+            trailing: trailing,
+            onTap: _openItem,
+          );
+
+          if (!Platform.isLinux) {
+            return tile;
+          }
+
+          return Listener(
+            child: tile,
+            onPointerDown: (event) async {
+              if (event.kind != PointerDeviceKind.mouse ||
+                  event.buttons != kSecondaryMouseButton) {
+                return;
+              }
+
+              final overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+              final menuItem = await showMenu(
+                context: context,
+                items: [
+                  PopupMenuItem(child: Text('Создать ресурс'), value: _createResource),
+                  PopupMenuItem(child: Text('Изменить'), value: _editItem),
+                  PopupMenuItem(child: Text('Удалить'), value: _deleteItem),
+                ],
+                position: RelativeRect.fromSize(event.position & Size(48.0, 48.0), overlay.size),
+              );
+              if (menuItem != null) {
+                menuItem(context);
+              }
+            }
+            );
+        },
+      ),
+    );
+
+    if (Platform.isLinux) {
+      return wrappedItem;
+    }
+
+    return Slidable(
+      startActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        children: [
+          SlidableAction(
+            label: 'Создать \nресурс',
+            backgroundColor: Colors.green,
+            icon: Icons.add,
+            onPressed: _createResource,
+          ),
+          SlidableAction(
+            label: 'Изменить',
+            backgroundColor: Colors.blue,
+            icon: Icons.edit,
+            onPressed: _editItem,
+          ),
+          SlidableAction(
+            label: 'Удалить',
+            backgroundColor: Colors.red,
+            icon: Icons.delete,
+            onPressed: _deleteItem,
+          ),
+        ],
+      ),
+      child: wrappedItem,
+    );
+  }
+
+  _createResource(BuildContext context) async {
     // await
   }
 
-  _openItem(ImportedResource item) async {
-    final repo = context.read<ImportedResourceRepo>();
-    final detailed = await repo.getDetail(item);
-    await Navigator.of(context).pushNamed('/imported_resource/view', arguments: detailed);
+  _openItem() async {
+    await Navigator.of(context).pushNamed('/imported_resource/view', arguments: ItemWithPaginator(
+      paginator: widget.paginator,
+      item: widget.importedResource,
+    ));
   }
 
-  _editItem(ImportedResource item) {
-    Navigator.of(context).pushNamed('/imported_resource/edit', arguments: item);
+  _editItem(BuildContext context) {
+    Navigator.of(context).pushNamed('/imported_resource/edit', arguments: widget.importedResource);
   }
 
-  _deleteItem(ImportedResource item) async {
-    final confirm = await showConfirmDialog(context, 'Удалить импортированный ресурс?', item.name);
+  _deleteItem(BuildContext context) async {
+    final confirm = await showConfirmDialog(context, 'Удалить импортированный ресурс?', widget.importedResource.name);
     if (!confirm) {
       return;
     }
 
-    await _paginator.deleteItem(item);
+    await widget.paginator.deleteItem(widget.importedResource);
   }
 
-  _changeIgnore(ImportedResource item) async {
+  _changeIgnore() async {
+    setState(() {
+      _isIgnoreLoading = true;
+    });
+
+    final item = widget.importedResource;
     final repo = context.read<ImportedResourceRepo>();
-    await repo.updateItem(item, {'is_ignored': !item.isIgnored});
-    // TODO: отлов ошибок
-    item.update(isIgnored: !item.isIgnored);
+    try {
+      await repo.updateItem(item, {'is_ignored': !item.isIgnored});
+      item.update(isIgnored: !item.isIgnored);
+      _isIgnoreLoading = false;
+    } on Exception {
+      ScaffoldMessenger.of(context).showSnackBar(
+        createErrorSnackBar(_changeIgnore),
+      );
+      setState(() {
+        _isIgnoreLoading = false;
+      });
+    }
   }
 }
 
-
+// unused
 class ConvexBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
