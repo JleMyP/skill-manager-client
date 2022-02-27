@@ -75,7 +75,7 @@ class HttpApiClient {
     _setBaseUrl();
   }
 
-  HttpApiClient({ Dio? client }) {
+  HttpApiClient({ Dio? client, bool logHttp = true }) {
     _httpClient = client ?? Dio();
     _setBaseUrl();
 
@@ -95,7 +95,7 @@ class HttpApiClient {
 
     _httpClient.interceptors.addAll([
       _refresher,
-      HttpFormatter(logger: logger),
+      if (logHttp) HttpFormatter(logger: logger),
     ]);
   }
 
@@ -149,7 +149,7 @@ class HttpApiClient {
     try {
       return await func();
     } on DioError catch (error) {
-      if (error.error is SocketException) {
+      if (error.error is SocketException || error.error == 'XMLHttpRequest error.') {
         var err = ApiException(
           message: 'сервер недоступен',
           originalException: error,

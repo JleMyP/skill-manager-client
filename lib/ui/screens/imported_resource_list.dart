@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +6,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/config.dart';
 import '../../data/models/imported_resource.dart';
 import '../../data/paginators.dart';
 import '../../data/repos/imported_resources.dart';
@@ -197,7 +196,7 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
             onTap: _openItem,
           );
 
-          if (!Platform.isLinux) {
+          if (!context.read<Config>().isLinux) {
             return tile;
           }
 
@@ -228,7 +227,7 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
       ),
     );
 
-    if (Platform.isLinux) {
+    if (context.read<Config>().isLinux) {
       return wrappedItem;
     }
 

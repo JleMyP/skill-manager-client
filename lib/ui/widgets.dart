@@ -199,3 +199,9 @@ SnackBar createErrorSnackBar(VoidCallback retry) {
     ),
   );
 }
+
+bool isWide(BuildContext context) {
+  final width = MediaQuery.of(context).size.width;
+  final height = MediaQuery.of(context).size.height;
+  return width > height;
+}

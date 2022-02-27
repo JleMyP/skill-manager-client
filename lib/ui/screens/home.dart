@@ -1,14 +1,14 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:logger_flutter/logger_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shrink_sidemenu/shrink_sidemenu.dart';
 
+import '../../data/consts.dart';
 import '../../data/repos/user.dart';
 import '../dialogs.dart';
 import '../store.dart';
+import '../widgets.dart';
 import 'imported_resource_list.dart';
 import 'tag_list.dart';
 
@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
 
     _bodyKeys.putIfAbsent(page, GlobalKey.new);
     final state = _bodyKeys[page]!;
-    final tapCallback = Platform.isLinux ? null : _sideMenuTap;
+    final tapCallback = isWide(context) ? null : _sideMenuTap;
 
     Widget? body;
     switch (page) {
@@ -53,7 +53,7 @@ class HomePage extends StatelessWidget {
         break;
     }
 
-    if (Platform.isLinux) {
+    if (isWide(context)) {
       return Row(children: [
         Drawer(child: LeftMenu()),
         Expanded(child: body ?? Container()),
@@ -146,8 +146,7 @@ class LeftMenu extends StatelessWidget {
           },
         ),
         const Divider(height: 50),
-        // TODO: не рендерить консольку в release mode или по флагам
-        ListTile(
+        if (logConsole) ListTile(
           leading: const Icon(Icons.insert_drive_file),
           title: const Text('Логи'),
           onTap: () => _showLogs(context),

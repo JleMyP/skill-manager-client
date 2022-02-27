@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +10,7 @@ class Config extends ChangeNotifier {
 
   bool get fake => _fake;
   int get netDelay => _netDelay;
+  bool get isLinux => !kIsWeb && Platform.isLinux;
 
   Future<void> update({required bool fake, required int netDelay}) async {
     _fake = fake;

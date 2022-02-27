@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'data/api_client.dart';
 import 'data/config.dart';
+import 'data/consts.dart';
 import 'data/repos/imported_resources.dart';
 import 'data/repos/tag.dart';
 import 'data/repos/user.dart';
@@ -52,7 +53,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        Provider(create: (context) => HttpApiClient()),
+        Provider(create: (context) => HttpApiClient(logHttp: logHttp)),
         ChangeNotifierProvider(create: (context) => Config()..restore()),
         ChangeNotifierProxyProvider2<HttpApiClient, Config, UserRepo?>(
           create: (context) => null,
