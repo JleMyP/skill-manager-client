@@ -18,13 +18,12 @@ class ImportedResourceViewPage extends StatefulWidget {
 class ImportedResourceViewState extends State<ImportedResourceViewPage> {
   Future? future;
   late ImportedResource shortItem;
-  late LimitOffsetPaginator paginator;
 
   @override
   Widget build(BuildContext context) {
     final pair = ModalRoute.of(context)!.settings.arguments as ItemWithPaginator;
     shortItem = pair.item as ImportedResource;
-    paginator = pair.paginator;
+    final paginator = context.read<LimitOffsetPaginator<ImportedResource>>();
 
     if (future == null) {
       if (!pair.shouldFetch) {
@@ -63,7 +62,6 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
 
         return ImportedResourceViewLoadedPage(
           importedResource: snapshot.data as ImportedResource,
-          paginator: paginator,
           refresh: retry,
         );
       },
@@ -74,14 +72,12 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
 
 class ImportedResourceViewLoadedPage extends StatelessWidget {
   final ImportedResource importedResource;
-  final LimitOffsetPaginator paginator;
   final Future<void> Function() refresh;
 
   final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   ImportedResourceViewLoadedPage({
     required this.importedResource,
-    required this.paginator,
     required this.refresh,
     Key? key,
   }) : super(key: key);

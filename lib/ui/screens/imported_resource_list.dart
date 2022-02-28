@@ -26,6 +26,8 @@ final typeMap = {
   'ImportedResourceRepo': _github,
 };
 
+typedef ImportedResourcePaginator = LimitOffsetPaginator<ImportedResource>;
+
 
 class ImportedResourceListPage extends StatefulWidget {
   static const name = 'imported_resource_list_page';
@@ -60,8 +62,9 @@ class ImportedResourceListState extends State<ImportedResourceListPage> {
         ChangeNotifierProvider<BottomBarState>.value(
           value: _barState,
         ),
-        ProxyProvider<ImportedResourceRepo, LimitOffsetPaginator>(
-          update: (context, repo, prev) => LimitOffsetPaginator<ImportedResource>(repo: repo),
+        ChangeNotifierProxyProvider<ImportedResourceRepo, ImportedResourcePaginator>(
+          create: (context) => ImportedResourcePaginator(),
+          update: (context, repo, prev) => prev!..repo = repo,
         ),
       ],
       child: Consumer<BottomBarState>(
@@ -102,7 +105,7 @@ class BodyState extends State<Body> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
-    context.read<LimitOffsetPaginator>().fetchNext(notifyStart: false);
+    context.read<ImportedResourcePaginator>().fetchNext(notifyStart: false);
   }
 
   @override
@@ -114,7 +117,7 @@ class BodyState extends State<Body> {
   @override
   Widget build(BuildContext context) {
     final screen = context.watch<SelectedScreenStore>().screen;
-    final paginator = context.read<LimitOffsetPaginator<ImportedResource>>();
+    final paginator = context.read<ImportedResourcePaginator>();
 
     // TODO: хуита. а можно не перерисовываться без изменения экрана?
     if (screen != _prevScreen) {
@@ -233,19 +236,16 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
         motion: const DrawerMotion(),
         children: [
           SlidableAction(
-            label: 'Создать \nресурс',
             backgroundColor: Colors.green,
             icon: Icons.add,
             onPressed: _createResource,
           ),
           SlidableAction(
-            label: 'Изменить',
             backgroundColor: Colors.blue,
             icon: Icons.edit,
             onPressed: _editItem,
           ),
           SlidableAction(
-            label: 'Удалить',
             backgroundColor: Colors.red,
             icon: Icons.delete,
             onPressed: _deleteItem,
@@ -261,10 +261,10 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
   }
 
   _openItem() async {
-    await Navigator.of(context).pushNamed('/imported_resource/view', arguments: ItemWithPaginator(
-      paginator: context.read<LimitOffsetPaginator>(),  // todo: skip?
-      item: widget.importedResource,
-    ));
+    await Navigator.of(context).pushNamed(
+      '/imported_resource/view',
+      arguments: ItemWithPaginator(item: widget.importedResource),
+    );
   }
 
   _editItem(BuildContext context) {
@@ -272,12 +272,16 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
   }
 
   _deleteItem(BuildContext context) async {
-    final confirm = await showConfirmDialog(context, 'Удалить импортированный ресурс?', widget.importedResource.name);
+    final confirm = await showConfirmDialog(
+      context,
+      'Удалить импортированный ресурс?',
+      widget.importedResource.name,
+    );
     if (!confirm) {
       return;
     }
 
-    final paginator = context.read<LimitOffsetPaginator>();
+    final paginator = context.read<ImportedResourcePaginator>();
     // todo: try
     await paginator.deleteItem(widget.importedResource);
   }
@@ -342,6 +346,13 @@ class ImportedResourceFilterState extends State<ImportedResourceFilter> {
   bool? _ignore = false;
 
   @override
+  void initState() {
+    super.initState();
+    final paginator = context.read<ImportedResourcePaginator>();
+    _ignore = paginator.params?['is_ignored'] ?? null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
@@ -380,9 +391,9 @@ class ImportedResourceFilterState extends State<ImportedResourceFilter> {
             ElevatedButton(
               child: const Text('Применить'),
               onPressed: () {
-                final paginator = context.read<LimitOffsetPaginator>();
-                final Map<String, dynamic> params = {};
+                final params = <String, dynamic>{};
                 if (_ignore != null) params['is_ignored'] = _ignore;
+                final paginator = context.read<ImportedResourcePaginator>();
                 paginator.setParams(params);
                 Navigator.of(context).pop();
               },

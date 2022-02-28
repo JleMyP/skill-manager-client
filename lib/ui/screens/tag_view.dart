@@ -24,7 +24,7 @@ class TagViewState extends State<TagViewPage> {
   Widget build(BuildContext context) {
     final pair = ModalRoute.of(context)!.settings.arguments as ItemWithPaginator;
     shortItem = pair.item as Tag;
-    paginator = pair.paginator;
+    paginator = pair.paginator!;
 
     if (future == null) {
       if (!pair.shouldFetch) {
