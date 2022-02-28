@@ -43,7 +43,7 @@ class HomePage extends StatelessWidget {
     final state = _bodyKeys[page]!;
     final tapCallback = isWide(context) ? null : _sideMenuTap;
 
-    Widget? body;
+    Widget body = Container();
     switch (page) {
       case ImportedResourceListPage.name:
         body = ImportedResourceListPage(tapCallback, state);
@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
     if (isWide(context)) {
       return Row(children: [
         Drawer(child: LeftMenu()),
-        Expanded(child: body ?? Container()),
+        Expanded(child: body),
       ]);
     }
 
@@ -65,7 +65,7 @@ class HomePage extends StatelessWidget {
       key: _sideMenuKey,
       type: SideMenuType.slideNRotate,
       menu: LeftMenu(tapCallback),
-      child: body ?? Container(),
+      child: body,
       radius: BorderRadius.circular(10),
     );
   }

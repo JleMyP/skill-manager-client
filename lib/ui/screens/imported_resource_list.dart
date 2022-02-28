@@ -60,6 +60,9 @@ class ImportedResourceListState extends State<ImportedResourceListPage> {
         ChangeNotifierProvider<BottomBarState>.value(
           value: _barState,
         ),
+        ProxyProvider<ImportedResourceRepo, LimitOffsetPaginator>(
+          update: (context, repo, prev) => LimitOffsetPaginator<ImportedResource>(repo: repo),
+        ),
       ],
       child: Consumer<BottomBarState>(
         child: Body(),
@@ -93,17 +96,13 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   int? _prevScreen;
-  late LimitOffsetPaginator<ImportedResource> _paginator;
-
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
-    final repo = context.read<ImportedResourceRepo>();
-    _paginator = LimitOffsetPaginator<ImportedResource>(repo: repo)
-      ..fetchNext(notifyStart: false);
+    context.read<LimitOffsetPaginator>().fetchNext(notifyStart: false);
   }
 
   @override
@@ -115,27 +114,27 @@ class BodyState extends State<Body> {
   @override
   Widget build(BuildContext context) {
     final screen = context.watch<SelectedScreenStore>().screen;
+    final paginator = context.read<LimitOffsetPaginator<ImportedResource>>();
 
     // TODO: хуита. а можно не перерисовываться без изменения экрана?
     if (screen != _prevScreen) {
       if (screen == 0) {
-        _paginator.setParams(null);
+        paginator.setParams(null);
       } else if (screen == 1) {
-        _paginator.setParams({'is_ignored': true});
+        paginator.setParams({'is_ignored': true});
       } else if (screen == 2) {
-        _paginator.setParams({'is_ignored': false});
+        paginator.setParams({'is_ignored': false});
       }
 
       _prevScreen = screen;
     }
 
-    return PaginatedListView(_paginator, _buildListItem, _scrollController);
+    return PaginatedListView(paginator, _buildListItem, _scrollController);
   }
 
   Widget _buildListItem(BuildContext context, ImportedResource item) {
     return ImportedResourceListItem(
       importedResource: item,
-      paginator: _paginator,
       key: ObjectKey(item),
     );
   }
@@ -154,11 +153,9 @@ class BodyState extends State<Body> {
 
 class ImportedResourceListItem extends StatefulWidget {
   final ImportedResource importedResource;
-  final LimitOffsetPaginator<ImportedResource> paginator;
 
   ImportedResourceListItem({
     required this.importedResource,
-    required this.paginator,
     Key? key,
   }) : super(key: key);
 
@@ -222,7 +219,7 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
                 menuItem(context);
               }
             }
-            );
+          );
         },
       ),
     );
@@ -265,7 +262,7 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
 
   _openItem() async {
     await Navigator.of(context).pushNamed('/imported_resource/view', arguments: ItemWithPaginator(
-      paginator: widget.paginator,
+      paginator: context.read<LimitOffsetPaginator>(),  // todo: skip?
       item: widget.importedResource,
     ));
   }
@@ -280,7 +277,9 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
       return;
     }
 
-    await widget.paginator.deleteItem(widget.importedResource);
+    final paginator = context.read<LimitOffsetPaginator>();
+    // todo: try
+    await paginator.deleteItem(widget.importedResource);
   }
 
   _changeIgnore() async {
@@ -340,7 +339,7 @@ class ImportedResourceFilter extends StatefulWidget {
 
 class ImportedResourceFilterState extends State<ImportedResourceFilter> {
   final _formKey = GlobalKey<FormState>();
-  int _ignore = 0;
+  bool? _ignore = false;
 
   @override
   Widget build(BuildContext context) {
@@ -356,21 +355,21 @@ class ImportedResourceFilterState extends State<ImportedResourceFilter> {
                   DrawerHeader(
                     child: const Text('Фильтры', style: TextStyle(fontSize: 20)),
                   ),
-                  DropdownButtonFormField<int>(
+                  DropdownButtonFormField<bool?>(
                     decoration: const InputDecoration(labelText: 'Игнор'),
                     value: _ignore,
-                    onChanged: (newVal) => setState(() => _ignore = newVal!),
+                    onChanged: (newVal) => setState(() => _ignore = newVal),
                     items: [
                       DropdownMenuItem(
-                        value: 1,
+                        value: true,
                         child: const Text('Да'),
                       ),
                       DropdownMenuItem(
-                        value: -1,
+                        value: false,
                         child: const Text('Нет'),
                       ),
                       DropdownMenuItem(
-                        value: 0,
+                        value: null,
                         child: const Text('Пофиг'),
                       ),
                     ],
@@ -380,7 +379,13 @@ class ImportedResourceFilterState extends State<ImportedResourceFilter> {
             ),
             ElevatedButton(
               child: const Text('Применить'),
-              onPressed: () {},
+              onPressed: () {
+                final paginator = context.read<LimitOffsetPaginator>();
+                final Map<String, dynamic> params = {};
+                if (_ignore != null) params['is_ignored'] = _ignore;
+                paginator.setParams(params);
+                Navigator.of(context).pop();
+              },
             ),
           ],
         ),
