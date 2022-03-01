@@ -50,7 +50,7 @@ static void my_application_activate(GApplication* application) {
 
   gtk_window_set_default_size(window, 800, 600);
   GdkGeometry size_hints;
-  size_hints.min_width = 600;
+  size_hints.min_width = 300;
   size_hints.min_height = 400;
   gtk_window_set_geometry_hints(GTK_WINDOW(window), GTK_WIDGET(window), &size_hints, GDK_HINT_MIN_SIZE);
   gtk_widget_show(GTK_WIDGET(window));

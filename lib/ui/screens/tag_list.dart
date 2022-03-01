@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/config.dart';
 import '../../data/models/tag.dart';
 import '../../data/paginators.dart';
 import '../../data/repos/tag.dart';
@@ -11,7 +12,7 @@ import '../store.dart';
 import '../widgets.dart';
 
 
-class TagListPage extends StatefulWidget {
+class TagListPage extends StatelessWidget {
   static const name = 'tag_list_page';
 
   final VoidCallback? sideMenuTap;
@@ -19,42 +20,57 @@ class TagListPage extends StatefulWidget {
   TagListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
   @override
-  TagListState createState() => TagListState();
-}
-
-
-class TagListState extends State<TagListPage> {
-  late ButtonState _buttonState;
-
-  @override
-  void initState() {
-    super.initState();
-    _buttonState = ButtonState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ButtonState>.value(
-      value: _buttonState,
+    return ChangeNotifierProvider<ButtonState>(
+      create: (context) => ButtonState(),
       child: Consumer<ButtonState>(
         child: Body(),
-        builder: (context, _bs, child) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Метки'),
-            leading: widget.sideMenuTap != null ? IconButton(
+        builder: (context, buttonState, child) {
+          Widget? menu;
+          if (sideMenuTap != null) {
+            menu = IconButton(
               icon: const Icon(Icons.menu),
-              onPressed: widget.sideMenuTap,
-            ) : null,
-          ),
-          body: SafeArea(
-            child: child!,
-          ),
-          endDrawer: Drawer(
-            child: TagFilter(),
-          ),
-          floatingActionButton: _bs.show ? FloatingButton() : null,
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        ),
+              onPressed: sideMenuTap,
+            );
+          }
+          final isLinux = context.read<Config>().isLinux;
+          final showButton = buttonState.show && !isLinux;
+          var actions = <Widget>[];
+          if (isLinux) {
+            actions = [
+              IconButton(
+                icon: Icon(Icons.replay),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
+              ),
+              Builder(builder: (context) => IconButton(
+                icon: Icon(Icons.filter_alt_outlined),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              )),
+            ];
+          }
+
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Метки'),
+              leading: menu,
+              actions: actions,
+            ),
+            body: SafeArea(
+              child: child!,
+            ),
+            endDrawer: Drawer(
+              child: TagFilter(),
+            ),
+            floatingActionButton: showButton ? FloatingButton() : null,
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          );
+        },
       ),
     );
   }
@@ -100,6 +116,10 @@ class BodyState extends State<Body> {
   }
 
   _handleScroll() {
+    if (context.read<Config>().isLinux) {
+      return;
+    }
+
     final buttonState = context.read<ButtonState>();
 
     if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {

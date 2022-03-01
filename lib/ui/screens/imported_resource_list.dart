@@ -54,14 +54,33 @@ class ImportedResourceListPage extends StatelessWidget {
               onPressed: sideMenuTap,
             );
           }
+          var actions = <Widget>[];
+          if (context.read<Config>().isLinux) {
+            actions = [
+              IconButton(
+                icon: Icon(Icons.replay),
+                onPressed: () {
+                  paginator.reset();
+                  paginator.fetchNext();
+                },
+              ),
+              Builder(builder: (context) => IconButton(
+                icon: Icon(Icons.filter_alt_outlined),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              )),
+            ];
+          }
 
           return Scaffold(
             appBar: AppBar(
               title: const Text('Импортированные ресурсы'),
               leading: menu,
+              actions: actions,
             ),
             body: SafeArea(
-              child: PaginatedListView(paginator, _buildListItem),
+              child: PaginatedListView(paginator, _buildListItem, ScrollController()),
             ),
             endDrawer: Drawer(
               child: ImportedResourceFilter(),

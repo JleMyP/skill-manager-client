@@ -116,7 +116,6 @@ class PaginatedListView<T extends BaseModel> extends StatelessWidget {
             return RetryBody(paginator.fetchNext);
           }
 
-          // todo: not work on linux
           return RefreshIndicator(
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -202,6 +201,5 @@ SnackBar createErrorSnackBar(VoidCallback retry) {
 
 bool isWide(BuildContext context) {
   final width = MediaQuery.of(context).size.width;
-  final height = MediaQuery.of(context).size.height;
-  return width > height;
+  return width >= 600;
 }
