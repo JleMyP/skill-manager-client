@@ -36,7 +36,6 @@ dependencies:
 #    git: https://github.com/ewertonrp/logger_flutter.git
     git: https://github.com/etq-labs/logger_flutter.git
   dio_http_formatter: ^2.1.0
-  convex_bottom_bar: ^3.0.0
   shrink_sidemenu: ^2.0.0+2-null-safety
   flutter_slidable: ^1.2.0
   flutter_markdown: ^0.6.9

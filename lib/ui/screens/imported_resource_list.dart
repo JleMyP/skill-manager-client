@@ -1,7 +1,5 @@
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +27,7 @@ final typeMap = {
 typedef ImportedResourcePaginator = LimitOffsetPaginator<ImportedResource>;
 
 
-class ImportedResourceListPage extends StatefulWidget {
+class ImportedResourceListPage extends StatelessWidget {
   static const name = 'imported_resource_list_page';
 
   final VoidCallback? sideMenuTap;
@@ -37,102 +35,41 @@ class ImportedResourceListPage extends StatefulWidget {
   ImportedResourceListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
 
   @override
-  ImportedResourceListState createState() => ImportedResourceListState();
-}
-
-
-class ImportedResourceListState extends State<ImportedResourceListPage> {
-  late SelectedScreenStore _screenStore;
-  late BottomBarState _barState;
-
-  @override
-  void initState() {
-    super.initState();
-    _screenStore = SelectedScreenStore();
-    _barState = BottomBarState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<SelectedScreenStore>.value(
-          value: _screenStore,
-        ),
-        ChangeNotifierProvider<BottomBarState>.value(
-          value: _barState,
-        ),
-        ChangeNotifierProxyProvider<ImportedResourceRepo, ImportedResourcePaginator>(
-          create: (context) => ImportedResourcePaginator(),
-          update: (context, repo, prev) => prev!..repo = repo,
-        ),
-      ],
-      child: Consumer<BottomBarState>(
-        child: Body(),
-        builder: (context, bs, child) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Импортированные ресурсы'),
-            leading: widget.sideMenuTap != null ? IconButton(
+    return  ChangeNotifierProxyProvider<ImportedResourceRepo, ImportedResourcePaginator>(
+      create: (context) => ImportedResourcePaginator(),
+      update: (context, repo, prev) {
+        prev!.repo = repo;
+        prev.fetchNext(notifyStart: false);
+        return prev;
+      },
+      child: Builder(
+        builder: (context) {
+          final paginator = context.read<ImportedResourcePaginator>();
+
+          Widget? menu;
+          if (sideMenuTap != null) {
+            menu = IconButton(
               icon: const Icon(Icons.menu),
-              onPressed: widget.sideMenuTap,
-            ) : null,
-          ),
-          body: SafeArea(
-            child: child!,
-          ),
-          endDrawer: Drawer(
-            child: ImportedResourceFilter(),
-          ),
-          // bottomNavigationBar: bs.show ? ConvexBottomBar() : null,
-        ),
+              onPressed: sideMenuTap,
+            );
+          }
+
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Импортированные ресурсы'),
+              leading: menu,
+            ),
+            body: SafeArea(
+              child: PaginatedListView(paginator, _buildListItem),
+            ),
+            endDrawer: Drawer(
+              child: ImportedResourceFilter(),
+            ),
+          );
+        },
       ),
     );
-  }
-}
-
-
-class Body extends StatefulWidget {
-  @override
-  BodyState createState() => BodyState();
-}
-
-
-class BodyState extends State<Body> {
-  int? _prevScreen;
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_handleScroll);
-    context.read<ImportedResourcePaginator>().fetchNext(notifyStart: false);
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_handleScroll);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screen = context.watch<SelectedScreenStore>().screen;
-    final paginator = context.read<ImportedResourcePaginator>();
-
-    // TODO: хуита. а можно не перерисовываться без изменения экрана?
-    if (screen != _prevScreen) {
-      if (screen == 0) {
-        paginator.setParams(null);
-      } else if (screen == 1) {
-        paginator.setParams({'is_ignored': true});
-      } else if (screen == 2) {
-        paginator.setParams({'is_ignored': false});
-      }
-
-      _prevScreen = screen;
-    }
-
-    return PaginatedListView(paginator, _buildListItem, _scrollController);
   }
 
   Widget _buildListItem(BuildContext context, ImportedResource item) {
@@ -140,16 +77,6 @@ class BodyState extends State<Body> {
       importedResource: item,
       key: ObjectKey(item),
     );
-  }
-
-  _handleScroll() {
-    final buttonState = context.read<BottomBarState>();
-
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-      buttonState.show = false;
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-      buttonState.show = true;
-    }
   }
 }
 
@@ -261,9 +188,13 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
   }
 
   _openItem() async {
+    final paginator = context.read<ImportedResourcePaginator>();
     await Navigator.of(context).pushNamed(
       '/imported_resource/view',
-      arguments: ItemWithPaginator(item: widget.importedResource),
+      arguments: ItemWithPaginator(
+        item: widget.importedResource,
+        paginator: paginator,
+      ),
     );
   }
 
@@ -305,32 +236,6 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
         _isIgnoreLoading = false;
       });
     }
-  }
-}
-
-// unused
-class ConvexBottomBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final screenStore = context.watch<SelectedScreenStore>();
-
-    return ConvexAppBar(
-      style: TabStyle.reactCircle,
-      backgroundColor: theme.primaryColor,
-      color: theme.backgroundColor,
-      initialActiveIndex: screenStore.screen,
-      items: [
-        const TabItem(icon: Icons.home, title: 'Все'),
-        const TabItem(icon: Icons.visibility_off, title: 'Игнор'),
-        const TabItem(icon: Icons.visibility, title: 'Не игнор'),
-      ],
-      onTap: (i) => _onItemTapped(screenStore, i),
-    );
-  }
-
-  _onItemTapped(SelectedScreenStore screenStore, int newIndex) {
-    screenStore.screen = newIndex;
   }
 }
 

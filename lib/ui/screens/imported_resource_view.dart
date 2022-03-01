@@ -23,7 +23,7 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
   Widget build(BuildContext context) {
     final pair = ModalRoute.of(context)!.settings.arguments as ItemWithPaginator;
     shortItem = pair.item as ImportedResource;
-    final paginator = context.read<LimitOffsetPaginator<ImportedResource>>();
+    final paginator = pair.paginator as LimitOffsetPaginator<ImportedResource>;
 
     if (future == null) {
       if (!pair.shouldFetch) {

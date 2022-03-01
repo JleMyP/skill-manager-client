@@ -5,12 +5,12 @@ import '../data/paginators.dart';
 
 
 class ItemWithPaginator {
-  final LimitOffsetPaginator? paginator;
+  final LimitOffsetPaginator paginator;
   final BaseModel item;
   final bool shouldFetch;
 
   ItemWithPaginator({
-    this.paginator,
+    required this.paginator,
     required this.item,
     this.shouldFetch = true,
   });
