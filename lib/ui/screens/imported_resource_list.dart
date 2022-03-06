@@ -1,6 +1,4 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -31,70 +29,67 @@ class ImportedResourceListPage extends StatelessWidget {
   static const name = 'imported_resource_list_page';
 
   final VoidCallback? sideMenuTap;
+  final ScrollController _scrollController = ScrollController();
 
-  ImportedResourceListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
+  ImportedResourceListPage(this.sideMenuTap, Key? key) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Widget? menu;
+    if (sideMenuTap != null) {
+      menu = IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: sideMenuTap,
+      );
+    }
+    var actions = <Widget>[];
+    if (context.read<Config>().isLinux) {
+      actions = [
+        IconButton(
+          icon: const Icon(Icons.replay),
+          onPressed: () {
+            final paginator = context.read<ImportedResourcePaginator>();
+            paginator.reset();
+            paginator.fetchNext();
+          },
+        ),
+        Builder(builder: (context) => IconButton(
+          icon: const Icon(Icons.filter_alt_outlined),
+          onPressed: () {
+            Scaffold.of(context).openEndDrawer();
+          },
+        )),
+      ];
+    }
+
     return  ChangeNotifierProxyProvider<ImportedResourceRepo, ImportedResourcePaginator>(
       create: (context) => ImportedResourcePaginator(),
       update: (context, repo, prev) {
-        prev!.repo = repo;
-        prev.fetchNext(notifyStart: false);
+        if (prev!.repo != repo) {
+          prev.repo = repo;
+          prev.reset();
+        }
         return prev;
       },
-      child: Builder(
-        builder: (context) {
-          final paginator = context.read<ImportedResourcePaginator>();
-
-          Widget? menu;
-          if (sideMenuTap != null) {
-            menu = IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: sideMenuTap,
-            );
-          }
-          var actions = <Widget>[];
-          if (context.read<Config>().isLinux) {
-            actions = [
-              IconButton(
-                icon: Icon(Icons.replay),
-                onPressed: () {
-                  paginator.reset();
-                  paginator.fetchNext();
-                },
-              ),
-              Builder(builder: (context) => IconButton(
-                icon: Icon(Icons.filter_alt_outlined),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              )),
-            ];
-          }
-
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Импортированные ресурсы'),
-              leading: menu,
-              actions: actions,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Импортированные ресурсы'),
+          leading: menu,
+          actions: actions,
+        ),
+        body: SafeArea(
+          child: PaginatedListView<ImportedResource>(
+            (context, item) => ImportedResourceListItem(
+              importedResource: item,
+              key: ObjectKey(item),
             ),
-            body: SafeArea(
-              child: PaginatedListView(paginator, _buildListItem, ScrollController()),
-            ),
-            endDrawer: Drawer(
-              child: ImportedResourceFilter(),
-            ),
-          );
-        },
+            _scrollController,
+          ),
+        ),
+        endDrawer: Drawer(
+          child: ImportedResourceFilter(),
+        ),
       ),
-    );
-  }
-
-  Widget _buildListItem(BuildContext context, ImportedResource item) {
-    return ImportedResourceListItem(
-      importedResource: item,
-      key: ObjectKey(item),
     );
   }
 }
@@ -121,7 +116,7 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
     final wrappedItem = ChangeNotifierProvider<ImportedResource>.value(
       value: widget.importedResource,
       child: Consumer<ImportedResource>(
-        builder: (context, changedItem, child) {
+        builder: (context, changedItem, _) {
           Widget trailing;
           if (_isIgnoreLoading) {
             trailing = const CircularProgressIndicator();
@@ -134,72 +129,23 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
             );
           }
 
-          final tile = ListTile(
+          return ListTile(
             leading: typeMap[changedItem.type],
             title: Text(changedItem.name),
             subtitle: Text(changedItem.description ?? ''),
             trailing: trailing,
             onTap: _openItem,
           );
-
-          if (!context.read<Config>().isLinux) {
-            return tile;
-          }
-
-          return Listener(
-            child: tile,
-            onPointerDown: (event) async {
-              if (event.kind != PointerDeviceKind.mouse ||
-                  event.buttons != kSecondaryMouseButton) {
-                return;
-              }
-
-              final overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
-              final menuItem = await showMenu(
-                context: context,
-                items: [
-                  PopupMenuItem(child: Text('Создать ресурс'), value: _createResource),
-                  PopupMenuItem(child: Text('Изменить'), value: _editItem),
-                  PopupMenuItem(child: Text('Удалить'), value: _deleteItem),
-                ],
-                position: RelativeRect.fromSize(event.position & Size(48.0, 48.0), overlay.size),
-              );
-              if (menuItem != null) {
-                menuItem(context);
-              }
-            }
-          );
         },
       ),
     );
 
-    if (context.read<Config>().isLinux) {
-      return wrappedItem;
-    }
-
-    return Slidable(
-      startActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        children: [
-          SlidableAction(
-            backgroundColor: Colors.green,
-            icon: Icons.add,
-            onPressed: _createResource,
-          ),
-          SlidableAction(
-            backgroundColor: Colors.blue,
-            icon: Icons.edit,
-            onPressed: _editItem,
-          ),
-          SlidableAction(
-            backgroundColor: Colors.red,
-            icon: Icons.delete,
-            onPressed: _deleteItem,
-          ),
-        ],
-      ),
-      child: wrappedItem,
-    );
+    final _actions = [
+      ItemAction('Создать ресурс', Icons.add, Colors.green, _createResource),
+      ItemAction('Изменить', Icons.edit, Colors.blue, _editItem),
+      ItemAction('Удалить', Icons.delete, Colors.red, _deleteItem),
+    ];
+    return wrapActions(context, wrappedItem, _actions);
   }
 
   _createResource(BuildContext context) async {
@@ -267,7 +213,7 @@ class ImportedResourceFilter extends StatefulWidget {
 
 class ImportedResourceFilterState extends State<ImportedResourceFilter> {
   final _formKey = GlobalKey<FormState>();
-  bool? _ignore = false;
+  bool? _ignore;
 
   @override
   void initState() {

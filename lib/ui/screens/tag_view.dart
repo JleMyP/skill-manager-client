@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/config.dart';
 import '../../data/models/tag.dart';
 import '../../data/paginators.dart';
 import '../dialogs.dart';
@@ -17,27 +18,24 @@ class TagViewPage extends StatefulWidget {
 
 class TagViewState extends State<TagViewPage> {
   Future? future;
-  late Tag shortItem;
-  late LimitOffsetPaginator paginator;
 
   @override
   Widget build(BuildContext context) {
     final pair = ModalRoute.of(context)!.settings.arguments as ItemWithPaginator;
-    shortItem = pair.item as Tag;
-    paginator = pair.paginator;
+    final shortItem = pair.item as Tag;
 
     if (future == null) {
       if (!pair.shouldFetch) {
         future = Future.value(shortItem);
       } else {
         // TODO: обновлять существующий
-        future = paginator.repo.getDetail(shortItem);
+        future = pair.paginator.repo!.getDetail(shortItem);
       }
     }
 
     retry() async => setState(() {
       // TODO: обновлять существующий
-      future = paginator.repo.getDetail(shortItem);
+      future = pair.paginator.repo!.getDetail(shortItem);
     });
 
     return FutureBuilder(
@@ -65,7 +63,7 @@ class TagViewState extends State<TagViewPage> {
 
         return TagViewLoadedPage(
           tag: snapshot.data as Tag,
-          paginator: paginator,
+          paginator: pair.paginator,
           refresh: retry,
         );
       },
@@ -100,6 +98,11 @@ class TagViewLoadedPage extends StatelessWidget {
               leading: tag.icon != null ? Text(tag.icon!) : null,
               title: Text(tag.name),
               actions: [
+                if (!context.read<Config>().isLinux)
+                  IconButton(
+                    icon: const Icon(Icons.replay),
+                    onPressed: refresh,
+                  ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _edit(context),
@@ -150,46 +153,35 @@ class TagViewLoadedPage extends StatelessWidget {
     // Navigator.of(context).pushNamed('/tag/edit', arguments: tag);
   }
 
-  _changeLike(BuildContext context) async {
-    _scaffoldKey.currentState!.showSnackBar(
-      createLoadingSnackBar(),
-    );
-    try {
-      await paginator.repo.updateItem(tag, {'like': !tag.like});
-      tag.update(like: !tag.like);
-    } on Exception {
-      _scaffoldKey.currentState!.showSnackBar(
-        createErrorSnackBar(() => _changeLike(context)),
-      );
-      return;
-    }
-
-    _scaffoldKey.currentState!.showSnackBar(
-      createSuccessSnackBar(),
+  _changeLike(BuildContext context) {
+    doWithBars(
+      _scaffoldKey.currentState!,
+      () async {
+        await paginator.repo!.updateItem(tag, {'like': !tag.like});
+        tag.update(like: !tag.like);
+      },
+      () => _changeLike(context),
     );
   }
 
-  _delete(BuildContext context) async {
+  _delete(BuildContext context, {bool confirmed = false}) async {
     // TODO: а если лайк грузится?
-    final confirm = await showConfirmDialog(context, 'Удалить метку?', tag.name);
+    if (!confirmed) {
+      final confirm = await showConfirmDialog(context, 'Удалить метку?', tag.name);
 
-    if (!confirm) {
-      return;
+      if (!confirm) {
+        return;
+      }
     }
 
-    _scaffoldKey.currentState!.showSnackBar(
-      createLoadingSnackBar(),
+    await doWithBars(
+      _scaffoldKey.currentState!,
+      () async {
+        await paginator.deleteItem(tag);
+        Navigator.of(context).pop();
+      },
+      () => _delete(context, confirmed: true),
     );
-    try {
-      await paginator.deleteItem(tag);
-    } on Exception {
-      _scaffoldKey.currentState!.showSnackBar(
-        createErrorSnackBar(() => _delete(context)),
-      );
-      return;
-    }
-
-    Navigator.of(context).pop();
   }
 }
 

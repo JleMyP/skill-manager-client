@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/config.dart';
@@ -12,49 +11,71 @@ import '../store.dart';
 import '../widgets.dart';
 
 
+typedef TagPaginator = LimitOffsetPaginator<Tag>;
+
+
 class TagListPage extends StatelessWidget {
   static const name = 'tag_list_page';
 
   final VoidCallback? sideMenuTap;
 
-  TagListPage(this.sideMenuTap, GlobalKey key) : super(key: key);
+  TagListPage(this.sideMenuTap, Key? key) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ButtonState>(
-      create: (context) => ButtonState(),
+    Widget? menu;
+    if (sideMenuTap != null) {
+      menu = IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: sideMenuTap,
+      );
+    }
+
+    final isLinux = context.read<Config>().isLinux;
+    var actions = <Widget>[];
+    if (isLinux) {
+      actions = [
+        IconButton(
+          icon: const Icon(Icons.replay),
+          onPressed: () {
+            final paginator = context.read<TagPaginator>();
+            paginator.reset();
+            paginator.fetchNext();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
+        ),
+        Builder(builder: (context) => IconButton(
+          icon: Icon(Icons.filter_alt_outlined),
+          onPressed: () {
+            Scaffold.of(context).openEndDrawer();
+          },
+        )),
+      ];
+    }
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ButtonState>(
+          create: (context) => ButtonState(),
+        ),
+        ChangeNotifierProxyProvider<TagRepo, TagPaginator>(
+          create: (context) => TagPaginator(),
+          update: (context, repo, prev) {
+            if (prev!.repo != repo) {
+              prev.repo = repo;
+              prev.reset();
+            }
+            return prev;
+          },
+        ),
+      ],
       child: Consumer<ButtonState>(
         child: Body(),
         builder: (context, buttonState, child) {
-          Widget? menu;
-          if (sideMenuTap != null) {
-            menu = IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: sideMenuTap,
-            );
-          }
-          final isLinux = context.read<Config>().isLinux;
           final showButton = buttonState.show && !isLinux;
-          var actions = <Widget>[];
-          if (isLinux) {
-            actions = [
-              IconButton(
-                icon: Icon(Icons.replay),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
-              ),
-              Builder(builder: (context) => IconButton(
-                icon: Icon(Icons.filter_alt_outlined),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              )),
-            ];
-          }
-
           return Scaffold(
             appBar: AppBar(
               title: const Text('Метки'),
@@ -85,15 +106,11 @@ class Body extends StatefulWidget {
 
 class BodyState extends State<Body> {
   final ScrollController _scrollController = ScrollController();
-  late LimitOffsetPaginator<Tag> paginator;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
-    final repo = context.read<TagRepo>();
-    paginator = LimitOffsetPaginator<Tag>(repo: repo)
-      ..fetchNext(notifyStart: false);
   }
 
   @override
@@ -104,14 +121,12 @@ class BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
-    return PaginatedListView(paginator, _buildListItem, _scrollController);
-  }
-
-  Widget _buildListItem(BuildContext context, Tag item) {
-    return TagListItem(
-      tag: item,
-      paginator: paginator,
-      key: ObjectKey(item),
+    return PaginatedListView<Tag>(
+      (context, item) => TagListItem(
+        tag: item,
+        key: ObjectKey(item),
+      ),
+      _scrollController,
     );
   }
 
@@ -133,11 +148,9 @@ class BodyState extends State<Body> {
 
 class TagListItem extends StatefulWidget {
   final Tag tag;
-  final LimitOffsetPaginator<Tag> paginator;
 
   TagListItem({
     required this.tag,
-    required this.paginator,
     Key? key,
   }) : super(key: key);
 
@@ -151,52 +164,36 @@ class TagListItemState extends State<TagListItem> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: переусложение - смешивание прослушивания объекта и стейта виджета
-    //  вариант рещения - обертка вокруг Tag, включающая isLoading
-    return Slidable(
-      startActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        children: [
-          SlidableAction(
-            label: 'Изменить',
-            backgroundColor: Colors.blue,
-            icon: Icons.edit,
-            onPressed: _editItem,
-          ),
-          SlidableAction(
-            label: 'Удалить',
-            backgroundColor: Colors.red,
-            icon: Icons.delete,
-            onPressed: _deleteItem,
-          ),
-        ],
-      ),
-      child: ChangeNotifierProvider<Tag>.value(
-        value: widget.tag,
-        child: Consumer<Tag>(
-          builder: (_, __, ___) {
-            Widget trailing;
-            if (_isLikeLoading) {
-              trailing = const CircularProgressIndicator();
-            } else {
-              trailing = IconButton(
-                icon: widget.tag.like ? const Icon(Icons.favorite, color: Colors.red)
-                    : const Icon(Icons.favorite_border),
-                onPressed: _changeLike,
-              );
-            }
-
-            // TODO: не ловит изменения из страницы просмотра
-            return ListTile(
-              leading: widget.tag.icon != null ? Text(widget.tag.icon!) : null,
-              title: Text(widget.tag.name),
-              trailing: trailing,
-              onTap: _openItem,
+    final wrappedItem = ChangeNotifierProvider<Tag>.value(
+      value: widget.tag,
+      child: Consumer<Tag>(
+        builder: (context, item, _) {
+          Widget trailing;
+          if (_isLikeLoading) {
+            trailing = const CircularProgressIndicator();
+          } else {
+            trailing = IconButton(
+              icon: item.like ? const Icon(Icons.favorite, color: Colors.red)
+                  : const Icon(Icons.favorite_border),
+              onPressed: _changeLike,
             );
-          },
-        ),
+          }
+
+          return ListTile(
+            leading: item.icon != null ? Text(item.icon!) : null,
+            title: Text(item.name),
+            trailing: trailing,
+            onTap: _openItem,
+          );
+        },
       ),
     );
+
+    final _actions = [
+      ItemAction('Изменить', Icons.edit, Colors.blue, _editItem),
+      ItemAction('Удалить', Icons.delete, Colors.red, _deleteItem),
+    ];
+    return wrapActions(context, wrappedItem, _actions);
   }
 
   _changeLike() async {
@@ -220,8 +217,9 @@ class TagListItemState extends State<TagListItem> {
   }
 
   _openItem() async {
+    final paginator = context.read<TagPaginator>();
     await Navigator.of(context).pushNamed('/tag/view', arguments: ItemWithPaginator(
-      paginator: widget.paginator,
+      paginator: paginator,
       item: widget.tag,
       shouldFetch: false,
     ));
@@ -238,7 +236,8 @@ class TagListItemState extends State<TagListItem> {
       return;
     }
 
-    await widget.paginator.deleteItem(widget.tag);
+    final paginator = context.read<TagPaginator>();
+    await paginator.deleteItem(widget.tag);
   }
 }
 
@@ -251,7 +250,14 @@ class TagFilter extends StatefulWidget {
 
 class TagFilterState extends State<TagFilter> {
   final _formKey = GlobalKey<FormState>();
-  int _like = 0;
+  bool? _like;
+
+  @override
+  void initState() {
+    super.initState();
+    final paginator = context.read<TagPaginator>();
+    _like = paginator.params?['like'] ?? null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,24 +271,23 @@ class TagFilterState extends State<TagFilter> {
               child: ListView(
                 children: [
                   DrawerHeader(
-                    child: const Text('Фильтры меток', style: TextStyle(fontSize: 20)),
+                    child: const Text('Фильтры', style: TextStyle(fontSize: 20)),
                   ),
-                  // TODO: bottomBar
-                  DropdownButtonFormField<int>(
+                  DropdownButtonFormField<bool?>(
                     decoration: const InputDecoration(labelText: 'Лайк'),
                     value: _like,
-                    onChanged: (newVal) => setState(() => _like = newVal!),
+                    onChanged: (newVal) => setState(() => _like = newVal),
                     items: [
                       DropdownMenuItem(
-                        value: 1,
+                        value: true,
                         child: const Text('Да'),
                       ),
                       DropdownMenuItem(
-                        value: -1,
+                        value: false,
                         child: const Text('Нет'),
                       ),
                       DropdownMenuItem(
-                        value: 0,
+                        value: null,
                         child: const Text('Пофиг'),
                       ),
                     ],
@@ -292,7 +297,13 @@ class TagFilterState extends State<TagFilter> {
             ),
             ElevatedButton(
               child: const Text('Применить'),
-              onPressed: () {},
+              onPressed: () {
+                final params = <String, dynamic>{};
+                if (_like != null) params['like'] = _like;
+                final paginator = context.read<TagPaginator>();
+                paginator.setParams(params);
+                Navigator.of(context).pop();
+              },
             ),
           ],
         ),

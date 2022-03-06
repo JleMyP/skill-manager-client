@@ -9,7 +9,7 @@ import 'base_repository.dart';
 
 
 class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
-  late AbstractRepository<K> repo;
+  AbstractRepository<K>? repo;
   int limit;
 
   Map<String, dynamic>? _params;
@@ -21,14 +21,11 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   late Logger _logger;
 
   LimitOffsetPaginator({
-      AbstractRepository<K>? repo,
+      this.repo,
       this.limit = 25,
       Logger? logger,
   }) {
     _logger = logger ?? createLogger();
-    if (repo != null) {
-      this.repo = repo;
-    }
   }
 
   UnmodifiableListView<K> get items => UnmodifiableListView(_items!);
@@ -92,7 +89,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
 
     ResultAndMeta<K> pair;
     try {
-      pair = await repo.getList(params: _params);
+      pair = await repo!.getList(params: _params);
     } on Exception catch(e, s) {
       _isFailed = true;
       _isLoading = false;
@@ -115,7 +112,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
 
   Future<void> deleteItem(K item) async {
     _logger.v('deleting item $item');
-    await repo.deleteItem(item);
+    await repo!.deleteItem(item);
     _items!.remove(item);
     _count = count! - 1;
     notifyListeners();

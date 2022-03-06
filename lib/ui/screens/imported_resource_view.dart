@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/models/imported_resource.dart';
 import '../../data/paginators.dart';
+import '../dialogs.dart';
 import '../store.dart';
 import '../webview.dart';
 import '../widgets.dart';
@@ -17,26 +18,24 @@ class ImportedResourceViewPage extends StatefulWidget {
 
 class ImportedResourceViewState extends State<ImportedResourceViewPage> {
   Future? future;
-  late ImportedResource shortItem;
 
   @override
   Widget build(BuildContext context) {
     final pair = ModalRoute.of(context)!.settings.arguments as ItemWithPaginator;
-    shortItem = pair.item as ImportedResource;
-    final paginator = pair.paginator as LimitOffsetPaginator<ImportedResource>;
+    final shortItem = pair.item as ImportedResource;
 
     if (future == null) {
       if (!pair.shouldFetch) {
         future = Future.value(shortItem);
       } else {
         // TODO: обновлять существующий
-        future = paginator.repo.getDetail(shortItem);
+        future = pair.paginator.repo!.getDetail(shortItem);
       }
     }
 
     retry() async => setState(() {
       // TODO: обновлять существующий
-      future = paginator.repo.getDetail(shortItem);
+      future = pair.paginator.repo!.getDetail(shortItem);
     });
 
     return FutureBuilder(
@@ -62,6 +61,7 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
 
         return ImportedResourceViewLoadedPage(
           importedResource: snapshot.data as ImportedResource,
+          paginator: pair.paginator,
           refresh: retry,
         );
       },
@@ -72,12 +72,14 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
 
 class ImportedResourceViewLoadedPage extends StatelessWidget {
   final ImportedResource importedResource;
+  final LimitOffsetPaginator paginator;
   final Future<void> Function() refresh;
 
   final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
 
   ImportedResourceViewLoadedPage({
     required this.importedResource,
+    required this.paginator,
     required this.refresh,
     Key? key,
   }) : super(key: key);
@@ -102,12 +104,9 @@ class ImportedResourceViewLoadedPage extends StatelessWidget {
                   onSelected: (action) => (action as Function)(context),
                   itemBuilder: (_) => [
                     PopupMenuItem(
-                      value: _ignore,
-                      child: const Text('Заигнорить'),
-                    ),
-                    PopupMenuItem(
-                      value: _unignore,
-                      child: const Text('Разигнорить'),
+                      value: _changeIgnore,
+                      child: importedResource.isIgnored ? const Text('Разигнорить')
+                        : const Text('Заигнорить'),
                     ),
                     PopupMenuItem(
                       value: _createResource,
@@ -145,22 +144,43 @@ class ImportedResourceViewLoadedPage extends StatelessWidget {
   }
 
   _edit(BuildContext context) async {
-    await Navigator.of(context).pushNamed('/imported_resource/edit', arguments: importedResource);
+    // TODO: а если игнор грузится?
+    // await Navigator.of(context).pushNamed('/imported_resource/edit', arguments: importedResource);
   }
 
-  _ignore(BuildContext context) async {
-    // TODO: обновить удаленно, обновить пагинатор
-  }
-
-  _unignore(BuildContext context) async {
-    // TODO: обновить удаленно, обновить пагинатор
+  _changeIgnore(BuildContext context) async {
+    doWithBars(
+      _scaffoldKey.currentState!,
+      () async {
+        // TODO: не обновляет список, ибо другой объект
+        await paginator.repo!.updateItem(importedResource, {'is_ignored': !importedResource.isIgnored});
+        importedResource.update(isIgnored: !importedResource.isIgnored);
+      },
+      () => _changeIgnore(context),
+    );
   }
 
   _createResource(BuildContext context) async {
-    // TODO: обновить удаленно, обновить пагинатор
+    // TODO
   }
 
-  _delete(BuildContext context) async {
-    // TODO: спросить, грохнуть, грохнуть из пагинатора
+  _delete(BuildContext context, {bool confirmed = false}) async {
+    // TODO: а если игнор грузится?
+    if (!confirmed) {
+      final confirm = await showConfirmDialog(context, 'Удалить метку?', importedResource.name);
+
+      if (!confirm) {
+        return;
+      }
+    }
+
+    await doWithBars(
+      _scaffoldKey.currentState!,
+      () async {
+        await paginator.deleteItem(importedResource);
+        Navigator.of(context).pop();
+      },
+      () => _delete(context, confirmed: true),
+    );
   }
 }

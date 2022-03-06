@@ -40,16 +40,16 @@ class HomePage extends StatelessWidget {
     final page = context.watch<SelectedPageStore>().page;
 
     _bodyKeys.putIfAbsent(page, GlobalKey.new);
-    final state = _bodyKeys[page]!;
+    final key = _bodyKeys[page];
     final tapCallback = isWide(context) ? null : _sideMenuTap;
 
     Widget body = Container();
     switch (page) {
       case ImportedResourceListPage.name:
-        body = ImportedResourceListPage(tapCallback, state);
+        body = ImportedResourceListPage(tapCallback, key);
         break;
       case TagListPage.name:
-        body = TagListPage(tapCallback, state);
+        body = TagListPage(tapCallback, key);
         break;
     }
 
