@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 
 
-class BaseModel extends ChangeNotifier {
+abstract class BaseModel extends ChangeNotifier {
   final int id;
+  bool isDetailLoaded;
 
-  BaseModel({required this.id});
+  BaseModel({required this.id, this.isDetailLoaded = false});
+
+  void updateFrom(BaseModel other);
 }

@@ -13,8 +13,8 @@ class ResultAndMeta<T> {
 abstract class AbstractRepository<T extends BaseModel> {
   Future<ResultAndMeta<T>> getList({Map<String, dynamic>? params});
 
-  Future<T?> getDetailById(int itemId);
-  Future<T?> getDetail(T item);
+  Future<T> getDetailById(int itemId);
+  Future<T> getDetail(T item);
 
   Future<void> deleteItemById(int itemId);
   Future<void> deleteItem(T item);
@@ -58,13 +58,16 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
     return ResultAndMeta<T>(list, meta);
   }
 
-  Future<T?> getDetailById(int itemId) async {
+  Future<T> getDetailById(int itemId) async {
     final response = await client.get('$baseUrl$itemId/');
     return parseItemFromDetail(response);
   }
 
-  Future<T?> getDetail(T item) async {
-    return await getDetailById(item.id);
+  Future<T> getDetail(T item) async {
+    final detail = await getDetailById(item.id);
+    item.updateFrom(detail);
+    item.isDetailLoaded = true;
+    return item;
   }
 
   Future<void> deleteItemById(int itemId) async {
@@ -81,7 +84,10 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
   }
 
   Future<T> updateItem(T item, JsonDict data) async {
-    return await updateItemById(item.id, data);
+    final detail = await updateItemById(item.id, data);
+    item.updateFrom(detail);
+    item.isDetailLoaded = true;
+    return item;
   }
 
   T parseItemFromList(JsonDict item);
@@ -104,11 +110,11 @@ abstract class BaseFakeRepository<T extends BaseModel> implements AbstractReposi
     return ResultAndMeta<T>(list);
   }
 
-  Future<T?> getDetailById(int itemId) async {
+  Future<T> getDetailById(int itemId) async {
     return fakeItemForDetail(itemId);
   }
 
-  Future<T?> getDetail(T item) async {
+  Future<T> getDetail(T item) async {
     return getDetailById(item.id);
   }
 
@@ -147,12 +153,12 @@ abstract class BaseDelayWrapper<T extends AbstractRepository<I>, I extends BaseM
     return await repo.getList(params: params);
   }
 
-  Future<I?> getDetailById(int itemId) async {
+  Future<I> getDetailById(int itemId) async {
     await delay();
     return await repo.getDetailById(itemId);
   }
 
-  Future<I?> getDetail(I item) async {
+  Future<I> getDetail(I item) async {
     await delay();
     return await repo.getDetail(item);
   }

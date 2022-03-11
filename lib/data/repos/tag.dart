@@ -136,23 +136,23 @@ class TagDelayWrapper extends BaseDelayWrapper<TagRepo, Tag> implements TagRepo 
   TagDelayWrapper(TagRepo repo, int netDelay): super(repo, netDelay);
 
   Future<TagValue> addValue({
-  	required int tagId,
-  	required String name,
-  	required int orderNum,
-  	required String icon,
+    required int tagId,
+    required String name,
+    required int orderNum,
+    required String icon,
   }) async {
-  	await delay();
-  	return await repo.addValue(
-  	  tagId: tagId,
-  	  name: name,
-  	  orderNum: orderNum,
-  	  icon: icon,
-  	);
+    await delay();
+    return await repo.addValue(
+      tagId: tagId,
+      name: name,
+      orderNum: orderNum,
+      icon: icon,
+    );
   }
 
   Future<void> removeValue(int tagId, int id) async {
-  	await delay();
-  	return await repo.removeValue(tagId, id);
+    await delay();
+    return await repo.removeValue(tagId, id);
   }
 }
 
@@ -162,11 +162,11 @@ TagRepo createTagRepo(Config config, HttpApiClient? client) {
   if (config.fake) {
     repo = TagFakeRepo();
   } else {
-  	repo = TagHttpRepo(client: client!);
+    repo = TagHttpRepo(client: client!);
   }
 
   if (config.netDelay != 0) {
-  	repo = TagDelayWrapper(repo, config.netDelay);
+    repo = TagDelayWrapper(repo, config.netDelay);
   }
 
   return repo;

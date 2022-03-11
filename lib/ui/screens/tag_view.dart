@@ -25,7 +25,7 @@ class TagViewState extends State<TagViewPage> {
     final shortItem = pair.item as Tag;
 
     if (future == null) {
-      if (!pair.shouldFetch) {
+      if (!pair.shouldFetch || shortItem.isDetailLoaded) {
         future = Future.value(shortItem);
       } else {
         // TODO: обновлять существующий
@@ -98,7 +98,7 @@ class TagViewLoadedPage extends StatelessWidget {
               leading: tag.icon != null ? Text(tag.icon!) : null,
               title: Text(tag.name),
               actions: [
-                if (!context.read<Config>().isLinux)
+                if (context.read<Config>().isLinux)
                   IconButton(
                     icon: const Icon(Icons.replay),
                     onPressed: refresh,
@@ -156,10 +156,7 @@ class TagViewLoadedPage extends StatelessWidget {
   _changeLike(BuildContext context) {
     doWithBars(
       _scaffoldKey.currentState!,
-      () async {
-        await paginator.repo!.updateItem(tag, {'like': !tag.like});
-        tag.update(like: !tag.like);
-      },
+      () => paginator.repo!.updateItem(tag, {'like': !tag.like}),
       () => _changeLike(context),
     );
   }

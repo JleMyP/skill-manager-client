@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
+import '../../data/config.dart';
 import '../../data/models/imported_resource.dart';
 import '../../data/paginators.dart';
 import '../dialogs.dart';
@@ -25,7 +26,7 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
     final shortItem = pair.item as ImportedResource;
 
     if (future == null) {
-      if (!pair.shouldFetch) {
+      if (!pair.shouldFetch || shortItem.isDetailLoaded) {
         future = Future.value(shortItem);
       } else {
         // TODO: обновлять существующий
@@ -96,6 +97,11 @@ class ImportedResourceViewLoadedPage extends StatelessWidget {
             appBar: AppBar(
               title: Text(importedResource.name),
               actions: [
+                if (context.read<Config>().isLinux)
+                  IconButton(
+                    icon: Icon(Icons.replay),
+                    onPressed: refresh,
+                  ),
                 IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () => _edit(context),
@@ -151,11 +157,7 @@ class ImportedResourceViewLoadedPage extends StatelessWidget {
   _changeIgnore(BuildContext context) async {
     doWithBars(
       _scaffoldKey.currentState!,
-      () async {
-        // TODO: не обновляет список, ибо другой объект
-        await paginator.repo!.updateItem(importedResource, {'is_ignored': !importedResource.isIgnored});
-        importedResource.update(isIgnored: !importedResource.isIgnored);
-      },
+      () => paginator.repo!.updateItem(importedResource, {'is_ignored': !importedResource.isIgnored}),
       () => _changeIgnore(context),
     );
   }

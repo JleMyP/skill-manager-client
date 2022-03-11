@@ -2,11 +2,11 @@ import '../base_model.dart';
 
 
 class TagValue extends BaseModel {
-  final String name;
-  final int orderNum;
+  String name;
+  int orderNum;
   final DateTime createdAt;
-  final String? icon;
-  final bool isDefault;
+  String? icon;
+  bool isDefault;
 
   TagValue({
     required id,
@@ -15,7 +15,16 @@ class TagValue extends BaseModel {
     required this.createdAt,
     this.icon,
     required this.isDefault,
-  }): super(id: id);
+  }): super(id: id, isDetailLoaded: true);
+
+  void updateFrom(BaseModel other) {
+    other as TagValue;
+    name = other.name;
+    orderNum = other.orderNum;
+    icon = other.icon;
+    isDefault = other.isDefault;
+    notifyListeners();
+  }
 }
 
 
@@ -23,7 +32,7 @@ class Tag extends BaseModel {
   String name;
   int orderNum;
   bool like;
-  DateTime createdAt;
+  final DateTime createdAt;
   String? icon;
   int? color;
   int targetType;
@@ -39,12 +48,24 @@ class Tag extends BaseModel {
     this.color,
     required this.targetType,
     required this.values,
-  }): super(id: id);
+  }): super(id: id, isDetailLoaded: true);
 
   void update({bool? like}) {
     if (like != null && this.like != like) {
       this.like = like;
       notifyListeners();
     }
+  }
+
+  void updateFrom(BaseModel other) {
+    other as Tag;
+    name = other.name;
+    orderNum = other.orderNum;
+    like = other.like;
+    icon = other.icon;
+    color = other.color;
+    targetType = other.targetType;
+    values = other.values;
+    notifyListeners();
   }
 }

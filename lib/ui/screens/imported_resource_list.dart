@@ -191,7 +191,6 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
     final repo = context.read<ImportedResourceRepo>();
     try {
       await repo.updateItem(item, {'is_ignored': !item.isIgnored});
-      item.update(isIgnored: !item.isIgnored);
       _isIgnoreLoading = false;
     } on Exception {
       ScaffoldMessenger.of(context).showSnackBar(

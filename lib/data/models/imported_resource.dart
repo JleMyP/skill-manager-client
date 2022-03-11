@@ -5,7 +5,7 @@ class ImportedResource extends BaseModel {
   String name;
   String? description;
   bool isIgnored;
-  DateTime createdAt;
+  final DateTime createdAt;
   String type;
   Map<String, dynamic> typeSpecific;
 
@@ -24,5 +24,14 @@ class ImportedResource extends BaseModel {
       this.isIgnored = isIgnored;
       notifyListeners();
     }
+  }
+
+  void updateFrom(BaseModel other) {
+    other as ImportedResource;
+    name = other.name;
+    description = other.description;
+    isIgnored = other.isIgnored;
+    typeSpecific = other.typeSpecific;
+    notifyListeners();
   }
 }

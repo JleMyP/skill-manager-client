@@ -204,7 +204,6 @@ class TagListItemState extends State<TagListItem> {
     final repo = context.read<TagRepo>();
     try {
       await repo.updateItem(widget.tag, {'like': !widget.tag.like});
-      widget.tag.update(like: !widget.tag.like);
       _isLikeLoading = false;
     } on Exception {
       ScaffoldMessenger.of(context).showSnackBar(
