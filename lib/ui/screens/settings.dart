@@ -28,9 +28,10 @@ class SettingsPageState extends State<SettingsPage> {
 
     final client = context.read<HttpApiClient>();
     final config = context.read<Config>();
-    _scheme = client.scheme;
-    _hostController.text = client.host;
-    _portController.text = client.port?.toString() ?? '';
+    final uri = Uri.dataFromString(client.baseUrl);
+    _scheme = uri.scheme;
+    _hostController.text = uri.host;
+    _portController.text = uri.port.toString();
     _netDelayController.text = config.netDelay.toString();
     _fake = config.fake;
     _offline = false;
@@ -133,11 +134,12 @@ class SettingsPageState extends State<SettingsPage> {
     }
 
     final client = context.read<HttpApiClient>();
-    client.configure(
+    client.baseUrl = Uri(
       scheme: _scheme,
       host: _hostController.text,
-      port: _portController.text != '' ? int.parse(_portController.text) : null,
-    );
+      port: int.tryParse(_portController.text),
+      path: '/api/v1',
+    ).toString();
     await client.storeSettings();
     final config = context.read<Config>();
     config.update(

@@ -2,14 +2,18 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio_http_formatter/dio_http_formatter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fresh_dio/fresh_dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import './config.dart';
 import '../utils/logger.dart';
 
 
 typedef JsonDict = Map<String, dynamic>;
+typedef Params = Map<String, dynamic>;
 
 
 class ApiException implements Exception {
@@ -32,87 +36,107 @@ class JwtTokenPair {
 
   JwtTokenPair(this.access, this.refresh) {
     final accessDecoded = JwtDecoder.decode(access);
-    accessExpire = DateTime.fromMillisecondsSinceEpoch(
-      accessDecoded['exp'] * 1000);
+    accessExpire = DateTime.fromMillisecondsSinceEpoch(accessDecoded['exp'] * 1000);
     final refreshDecoded = JwtDecoder.decode(refresh);
-    refreshExpire = DateTime.fromMillisecondsSinceEpoch(
-      refreshDecoded['exp'] * 1000);
+    refreshExpire = DateTime.fromMillisecondsSinceEpoch(refreshDecoded['exp'] * 1000);
     // TODO: checks: type, time
   }
 
   OAuth2Token asOauth() => OAuth2Token(
-    accessToken: access,
-    refreshToken: refresh,
-    expiresIn: accessExpire.millisecondsSinceEpoch ~/ 1000,
-    tokenType: 'Token',
-  );
+        accessToken: access,
+        refreshToken: refresh,
+        expiresIn: accessExpire.millisecondsSinceEpoch ~/ 1000,
+        tokenType: 'Token',
+      );
 }
 
 
-class HttpApiClient {
-  final _authUrl = '/token/';
-  final _refreshUrl = '/token/refresh/';
+class SpTokenStorage implements TokenStorage<OAuth2Token> {
+  static const _accessKey = 'auth:jwt:access';
+  static const _refreshKey = 'auth:jwt:refresh';
 
-  String _scheme = 'http';
-  String _host = 'localhost';
-  int? _port;
+  Future<OAuth2Token?> read() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final access = sharedPreferences.getString(_accessKey);
+    final refresh = sharedPreferences.getString(_refreshKey);
+
+    if (access == null) {
+      return null;
+    }
+
+    return OAuth2Token(
+      accessToken: access,
+      refreshToken: refresh,
+      tokenType: 'Token',
+    );
+  }
+
+  Future<void> write(OAuth2Token token) async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(_accessKey, token.accessToken);
+    await sharedPreferences.setString(_refreshKey, token.refreshToken!);
+  }
+
+  Future<void> delete() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.remove(_accessKey);
+    await sharedPreferences.remove(_refreshKey);
+  }
+}
+
+
+class HttpApiClient extends ChangeNotifier {
+  static const _authUrl = '/v1/token/';
+  static const _refreshUrl = '/v1/token/refresh/';
+  // static const _verifyUrl = '/v1/token/verify/';
+  static const _baseUrlKey = 'apiClient:backendApiUrl';
+
   late Fresh<OAuth2Token> _refresher;
   late Dio _httpClient;
+  late String _defaultBackendApiUrl;
+  late Level _logLevel;
+  late bool _logHttp;
 
-  String get scheme => _scheme;
-  set scheme(String value) {
-    _scheme = value;
-    _setBaseUrl();
-  }
-  String get host => _host;
-  set host(String value) {
-    _host = value;
-    _setBaseUrl();
-  }
-  int? get port => _port;
-  set port(int? value) {
-    _port = value;
-    _setBaseUrl();
-  }
+  set baseUrl(String url) => _httpClient.options.baseUrl = url;
+  String get baseUrl => _httpClient.options.baseUrl;
 
-  HttpApiClient({ Dio? client, bool logHttp = true }) {
+  HttpApiClient({required Config config, Dio? client}) {
     _httpClient = client ?? Dio();
-    _setBaseUrl();
+    _defaultBackendApiUrl = config.backendApiUrl;
+    _logLevel = config.logLevel;
+    _logHttp = config.logHttp;
+    baseUrl = _defaultBackendApiUrl;
 
     _refresher = Fresh.oAuth2(
-      tokenStorage: InMemoryTokenStorage(),  // TODO: shared preferences
+      tokenStorage: SpTokenStorage(),
       shouldRefresh: (response) {
         return response?.requestOptions.path != _authUrl &&
-          response?.requestOptions.path != _refreshUrl &&
-          (response?.statusCode == 401 || response?.statusCode == 403);
+            response?.requestOptions.path != _refreshUrl &&
+            (response?.statusCode == 401 || response?.statusCode == 403);
       },
       refreshToken: (token, client) async {
-        final response = await post(_refreshUrl, {'refresh': token!.refreshToken});
-        return JwtTokenPair(response['access'], token.refreshToken!).asOauth();
+        try {
+          final response = await post(_refreshUrl, {'refresh': token!.refreshToken});
+          return JwtTokenPair(response['access'], token.refreshToken!).asOauth();
+        } on ApiException {
+          throw RevokeTokenException();
+        }
       },
     );
-    final logger = createLogger();
+    final logger = createLogger(_logLevel);
 
     _httpClient.interceptors.addAll([
       _refresher,
-      if (logHttp) HttpFormatter(logger: logger),
+      if (config.logHttp) HttpFormatter(logger: logger),
     ]);
   }
 
-  void configure({
-      required String scheme,
-      required String host,
-      int? port,
-  }) {
-    _scheme = scheme;
-    _host = host;
-    _port = port;
-    _setBaseUrl();
-  }
-
-  _setBaseUrl() {
-    final portString = _port != null ? ':$_port' : '';
-    _httpClient.options.baseUrl = '$scheme://$_host$portString/api/v1';
+  bool shouldUpdate({required Config config, Dio? client}) {
+    var should = false;
+    if (client != null && client != _httpClient) should = true;
+    if (config.logLevel != _logLevel) should = true;
+    if (config.logHttp != _logHttp) should = true;
+    return should;
   }
 
   Future<void> authenticate(JsonDict authData) async {
@@ -126,22 +150,13 @@ class HttpApiClient {
 
   Future<void> storeSettings() async {
     final sp = await SharedPreferences.getInstance();
-    sp..setString('apiClient:scheme', scheme)
-      ..setString('apiClient:host', _host);
-
-    if (_port != null) {
-      sp.setInt('apiClient:port', _port!);
-    } else {
-      sp.remove('apiClient:port');
-    }
+    sp.setString(_baseUrlKey, baseUrl);
   }
 
   Future<void> restoreSettings() async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    _scheme = sharedPreferences.getString('apiClient:scheme') ?? 'http';
-    _host = sharedPreferences.getString('apiClient:host') ?? 'localhost';
-    _port = sharedPreferences.getInt('apiClient:port');
-    _setBaseUrl();
+    baseUrl = sharedPreferences.getString(_baseUrlKey) ??  _defaultBackendApiUrl;
+    notifyListeners();
   }
 
   Future _doRequest(Future Function() func) async {
@@ -165,43 +180,38 @@ class HttpApiClient {
       var data = error.response?.data;
       var ct = error.response?.headers['content-type']?[0];
       if (ct == null || !ct.contains('application/json')) {
-        var err = ApiException(
+        throw ApiException(
           rawData: data,
           originalException: error,
         );
-        throw err;
       }
 
       if (data is! Map) {
-        var err = ApiException(
+        throw ApiException(
           rawData: data,
           originalException: error,
         );
-        throw err;
       }
 
       if (data.containsKey('detail')) {
-        var err = ApiException(
+        throw ApiException(
           message: data['detail'],
           rawData: data,
           originalException: error,
         );
-        throw err;
       }
       if (data.containsKey('details') && data['details'][0] is String) {
-        var err = ApiException(
+        throw ApiException(
           message: (data['details'] as List<String>).join('\n'),
           rawData: data,
           originalException: error,
         );
-        throw err;
       }
 
-      var err = ApiException(
+      throw ApiException(
         rawData: data,
         originalException: error,
       );
-      throw err;
     }
   }
 

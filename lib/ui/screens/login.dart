@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../data/api_client.dart';
-import '../../data/config.dart';
 import '../../data/repos/user.dart';
 import '../../utils/validators.dart';
 import '../dialogs.dart';
@@ -92,8 +89,7 @@ class LoginPageState extends State<LoginPage> {
         _loginController.text,
         _passwordController.text,
       );
-      await _storeAuth();
-      await Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
+      await _success(context);
     } on Exception catch (e) {
       await showSimpleDialog(context, 'Авторизация не удалась (', e.toString());
       setState(() => _isLoading = false);
@@ -105,27 +101,18 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _restoreAuth() async {
-    final client = context.read<HttpApiClient>();
-    await client.restoreSettings();
+    setState(() => _isLoading = true);
 
-    final config = context.read<Config>();
-    await config.restore();
-
-    final sharedPreferences = await SharedPreferences.getInstance();
-    _loginController.text = sharedPreferences.getString('auth:login') ?? '';
-    _passwordController.text = sharedPreferences.getString('auth:password') ?? '';
-    final autoLogin = sharedPreferences.getBool('auth:autoLogin') ?? false;
-
-    if (autoLogin && _loginController.text != '' &&
-        _passwordController.text != '') {
-      await _login();
+    final userRepo = context.read<UserRepo>();
+    try {
+      await userRepo.reload();
+      _success(context);
+    } on Exception {
+      setState(() => _isLoading = false);
     }
   }
 
-  _storeAuth() async {
-    await SharedPreferences.getInstance()
-      ..setString('auth:login', _loginController.text)
-      ..setString('auth:password', _passwordController.text)
-      ..setBool('auth:autoLogin', true);
+  Future _success(BuildContext context) {
+    return Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
   }
 }

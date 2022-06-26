@@ -23,6 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   provider: ^6.0.2
   intl: ^0.17.0
   http: ^0.13.4
@@ -36,10 +37,12 @@ dependencies:
 #    git: https://github.com/ewertonrp/logger_flutter.git
     git: https://github.com/etq-labs/logger_flutter.git
   dio_http_formatter: ^2.1.0
+
+  url_launcher: ^6.0.20
+
   shrink_sidemenu: ^2.0.0+2-null-safety
   flutter_slidable: ^1.2.0
   flutter_markdown: ^0.6.9
-  url_launcher: ^6.0.20
   webview_flutter: ^3.0.0
   flutter_svg: ^1.0.3
 

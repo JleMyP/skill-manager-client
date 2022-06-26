@@ -11,16 +11,18 @@ class ResultAndMeta<T> {
 
 
 abstract class AbstractRepository<T extends BaseModel> {
-  Future<ResultAndMeta<T>> getList({Map<String, dynamic>? params});
+  Future<ResultAndMeta<T>> getList({Params? params});
 
-  Future<T> getDetailById(int itemId);
-  Future<T> getDetail(T item);
+  Future<T> getDetailById(int itemId, {Params? params});
+  Future<T> getDetail(T item, {Params? params});
 
-  Future<void> deleteItemById(int itemId);
-  Future<void> deleteItem(T item);
+  Future<void> deleteItemById(int itemId, {Params? params});
+  Future<void> deleteItem(T item, {Params? params});
 
-  Future<T> updateItemById(int itemId, Map<String, dynamic> data);
-  Future<T> updateItem(T item, Map<String, dynamic> data);
+  Future<T> updateItemById(int itemId, Params data);
+  Future<T> updateItem(T item, Params data);
+
+  Future<T> createItem(JsonDict data);
 }
 
 
@@ -36,7 +38,7 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
 
   String get baseUrl;
 
-  Future<ResultAndMeta<T>> getList({Map<String, dynamic>? params}) async {
+  Future<ResultAndMeta<T>> getList({Params? params}) async {
     JsonDict? meta;
 
     final response = await client.get(baseUrl, params: params);
@@ -50,32 +52,28 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
       rawList = response.cast<JsonDict>();
     }
 
-    final list = [
-      for (JsonDict item in rawList)
-        parseItemFromList(item)
-    ];
-
+    final list = [for (JsonDict item in rawList) parseItemFromList(item)];
     return ResultAndMeta<T>(list, meta);
   }
 
-  Future<T> getDetailById(int itemId) async {
+  Future<T> getDetailById(int itemId, {Params? params}) async {
     final response = await client.get('$baseUrl$itemId/');
     return parseItemFromDetail(response);
   }
 
-  Future<T> getDetail(T item) async {
-    final detail = await getDetailById(item.id);
+  Future<T> getDetail(T item, {Params? params}) async {
+    final detail = await getDetailById(item.id, params: params);
     item.updateFrom(detail);
     item.isDetailLoaded = true;
     return item;
   }
 
-  Future<void> deleteItemById(int itemId) async {
+  Future<void> deleteItemById(int itemId, {Params? params}) async {
     await client.delete('$baseUrl$itemId/');
   }
 
-  Future<void> deleteItem(T item) async {
-    await deleteItemById(item.id);
+  Future<void> deleteItem(T item, {Params? params}) async {
+    await deleteItemById(item.id, params: params);
   }
 
   Future<T> updateItemById(int itemId, JsonDict data) async {
@@ -90,6 +88,11 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
     return item;
   }
 
+  Future<T> createItem(JsonDict data) async {
+    final response = await client.post('$baseUrl/', data);
+    return parseItemFromDetail(response);
+  }
+
   T parseItemFromList(JsonDict item);
 
   T parseItemFromDetail(JsonDict item) {
@@ -101,7 +104,7 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
 abstract class BaseFakeRepository<T extends BaseModel> implements AbstractRepository<T> {
   int get fakeListCount => 30;
 
-  Future<ResultAndMeta<T>> getList({Map<String, dynamic>? params}) async {
+  Future<ResultAndMeta<T>> getList({Params? params}) async {
     final list = [
       for (var i = 0; i < fakeListCount; i++)
         fakeItemForList(i)
@@ -110,17 +113,17 @@ abstract class BaseFakeRepository<T extends BaseModel> implements AbstractReposi
     return ResultAndMeta<T>(list);
   }
 
-  Future<T> getDetailById(int itemId) async {
+  Future<T> getDetailById(int itemId, {Params? params}) async {
     return fakeItemForDetail(itemId);
   }
 
-  Future<T> getDetail(T item) async {
-    return getDetailById(item.id);
+  Future<T> getDetail(T item, {Params? params}) async {
+    return getDetailById(item.id, params: params);
   }
 
-  Future<void> deleteItemById(int itemId) async {}
+  Future<void> deleteItemById(int itemId, {Params? params}) async {}
 
-  Future<void> deleteItem(T item) async {}
+  Future<void> deleteItem(T item, {Params? params}) async {}
 
   Future<T> updateItemById(int itemId, JsonDict data) async {
     return fakeItemForDetail(itemId);
@@ -128,6 +131,10 @@ abstract class BaseFakeRepository<T extends BaseModel> implements AbstractReposi
 
   Future<T> updateItem(T item, JsonDict data) async {
     return updateItemById(item.id, data);
+  }
+
+  Future<T> createItem(Map<String, dynamic> data) async {
+    return fakeItemForDetail(-1);
   }
 
   T fakeItemForList(int i);
@@ -148,27 +155,27 @@ abstract class BaseDelayWrapper<T extends AbstractRepository<I>, I extends BaseM
     await Future.delayed(Duration(seconds: _netDelay));
   }
 
-  Future<ResultAndMeta<I>> getList({Map<String, dynamic>? params}) async {
+  Future<ResultAndMeta<I>> getList({Params? params}) async {
     await delay();
     return await repo.getList(params: params);
   }
 
-  Future<I> getDetailById(int itemId) async {
+  Future<I> getDetailById(int itemId, {Params? params}) async {
     await delay();
     return await repo.getDetailById(itemId);
   }
 
-  Future<I> getDetail(I item) async {
+  Future<I> getDetail(I item, {Params? params}) async {
     await delay();
     return await repo.getDetail(item);
   }
 
-  Future<void> deleteItemById(int itemId) async {
+  Future<void> deleteItemById(int itemId, {Params? params}) async {
     await delay();
     await repo.deleteItemById(itemId);
   }
 
-  Future<void> deleteItem(I item) async {
+  Future<void> deleteItem(I item, {Params? params}) async {
     await delay();
     await repo.deleteItem(item);
   }
@@ -181,5 +188,10 @@ abstract class BaseDelayWrapper<T extends AbstractRepository<I>, I extends BaseM
   Future<I> updateItem(I item, JsonDict data) async {
     await delay();
     return await repo.updateItem(item, data);
+  }
+
+  Future<I> createItem(JsonDict data) async {
+    await delay();
+    return await repo.createItem(data);
   }
 }

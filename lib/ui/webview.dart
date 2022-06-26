@@ -24,6 +24,6 @@ void openWeb(BuildContext context, String url) {
           javascriptMode: JavascriptMode.unrestricted,
         ),
       ),
-    ))
+    )),
   );
 }

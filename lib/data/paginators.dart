@@ -13,6 +13,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   int limit;
 
   Map<String, dynamic>? _params;
+  late Map<String, dynamic> _baseParams;
   List<K>? _items;
 
   bool _isLoading = false;
@@ -23,12 +24,14 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   LimitOffsetPaginator({
       this.repo,
       this.limit = 25,
+    Map<String, dynamic>? baseParams,
       Logger? logger,
   }) {
+    _baseParams = baseParams ?? {};
     _logger = logger ?? createLogger();
   }
 
-  UnmodifiableListView<K> get items => UnmodifiableListView(_items!);
+  UnmodifiableListView<K> get items => UnmodifiableListView(_items ?? []);
 
   int? get count => _count;
   bool get isConnected => _count != null;
@@ -37,6 +40,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isFailed => _isFailed;
   bool get isEmpty => isConnected && items.isEmpty;
+  int get offset => _params?['offset'] ?? 0;
 
   void setParams(Map<String, dynamic>? params) {
     _params = params;
@@ -77,6 +81,12 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
       };
     } else {
       _params!['offset'] = _items!.length;
+    }
+
+    for (final pair in _baseParams.entries) {
+      if (!_params!.containsKey(pair.key)) {
+        _params![pair.key] = params!.values;
+      }
     }
 
     _isFailed = false;

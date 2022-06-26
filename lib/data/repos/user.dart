@@ -6,49 +6,64 @@ import '../models/user.dart';
 
 
 abstract class UserRepo implements ChangeNotifier {
+  User? get currentUser;
+
   Future<User> authenticate(String username, String password);
+  Future<User> reload();
   void logout();
 }
 
 
-class UserHttpRepo extends ChangeNotifier implements UserFakeRepo {
-  late HttpApiClient _client;
-  User? currentUser;
+class UserHttpRepo extends ChangeNotifier implements UserRepo {
+  final HttpApiClient _client;
+  User? _currentUser;
+  User? get currentUser => _currentUser;
+  HttpApiClient get client => _client;
 
-  UserHttpRepo({ HttpApiClient? client }) {
-    if (client != null) {
-      _client = client;
-    }
-  }
+  UserHttpRepo(this._client);
 
   Future<User> authenticate(String username, String password) async {
     var authData = {'username': username, 'password': password};
     await _client.authenticate(authData);
-    currentUser = User(
-      username: username,
-    );
+    _currentUser = User(username: username);
     notifyListeners();
-    return currentUser!;
+    return _currentUser!;
+  }
+
+  Future<User> reload() async {
+    final resp = await _client.get('/v1/profile/');
+    _currentUser = User(username: resp['username']);
+    notifyListeners();
+    return _currentUser!;
   }
 
   void logout() {
-    currentUser = null;
+    _currentUser = null;
     _client.logout();
+    notifyListeners();
   }
 }
 
 
 class UserFakeRepo extends ChangeNotifier implements UserRepo {
-  User? currentUser;
+  User? _currentUser;
+  User? get currentUser => _currentUser;
 
   Future<User> authenticate(String username, String password) async {
-    currentUser = User(username: username);
+    _currentUser = User(username: username);
     notifyListeners();
-    return currentUser!;
+    return _currentUser!;
+  }
+
+  Future<User> reload() async {
+    _currentUser = User(username: 'FakeUsername');
+    notifyListeners();
+    return _currentUser!;
   }
 
   void logout() {
-    currentUser = null;
+    _currentUser = null;
+    notifyListeners();
   }
 }
 
@@ -56,6 +71,8 @@ class UserFakeRepo extends ChangeNotifier implements UserRepo {
 class UserDelayWrapper extends ChangeNotifier implements UserRepo {
   final UserRepo _repo;
   final int _netDelay;
+
+  User? get currentUser => _repo.currentUser;
 
   UserDelayWrapper(this._repo, this._netDelay) {
     _repo.addListener(notifyListeners);
@@ -66,25 +83,29 @@ class UserDelayWrapper extends ChangeNotifier implements UserRepo {
     super.dispose();
   }
 
-  Future<void> delay() async {
-    await Future.delayed(Duration(seconds: _netDelay));
-  }
-
   Future<User> authenticate(String username, String password) async {
-    await delay();
+    await _delay();
     return _repo.authenticate(username, password);
   }
-  void logout() {}
+
+  Future<User> reload() async {
+    await _delay();
+    return _repo.reload();
+  }
+
+  void logout() => _repo.logout();
+
+  Future<void> _delay() => Future.delayed(Duration(seconds: _netDelay));
 }
 
 
-UserRepo createUserRepo(Config config, HttpApiClient? client) {
+UserRepo createUserRepo(Config config, HttpApiClient client) {
   UserRepo repo;
 
   if (config.fake) {
     repo = UserFakeRepo();
   } else {
-    repo = UserHttpRepo(client: client!);
+    repo = UserHttpRepo(client);
   }
 
   if (config.netDelay != 0) {

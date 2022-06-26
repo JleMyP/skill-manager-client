@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shrink_sidemenu/shrink_sidemenu.dart';
 
-import '../../data/consts.dart';
+import '../../data/config.dart';
 import '../../data/repos/user.dart';
 import '../dialogs.dart';
 import '../store.dart';
@@ -93,7 +93,8 @@ class LeftMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var store = context.watch<SelectedPageStore>();
+    final store = context.watch<SelectedPageStore>();
+    final config = context.read<Config>();
     return ListView(
       children: [
         ListTile(
@@ -146,7 +147,7 @@ class LeftMenu extends StatelessWidget {
           },
         ),
         const Divider(height: 50),
-        if (logConsole) ListTile(
+        if (config.logConsole) ListTile(
           leading: const Icon(Icons.insert_drive_file),
           title: const Text('Логи'),
           onTap: () => _showLogs(context),

@@ -7,7 +7,8 @@ import '../models/imported_resource.dart';
 abstract class ImportedResourceRepo implements AbstractRepository<ImportedResource> {}
 
 
-class ImportedResourceHttpRepo extends BaseHttpRepository<ImportedResource> implements ImportedResourceRepo {
+class ImportedResourceHttpRepo extends BaseHttpRepository<ImportedResource>
+    implements ImportedResourceRepo {
   String get baseUrl => '/imported_resources/';
 
   ImportedResourceHttpRepo({ HttpApiClient? client }):
@@ -34,7 +35,8 @@ class ImportedResourceHttpRepo extends BaseHttpRepository<ImportedResource> impl
 }
 
 
-class ImportedResourceFakeRepo extends BaseFakeRepository<ImportedResource> implements ImportedResourceRepo {
+class ImportedResourceFakeRepo extends BaseFakeRepository<ImportedResource>
+    implements ImportedResourceRepo {
   @override
   ImportedResource fakeItemForList(int i) {
     return ImportedResource(
@@ -56,7 +58,8 @@ class ImportedResourceFakeRepo extends BaseFakeRepository<ImportedResource> impl
 }
 
 
-class ImportedResourceDelayWrapper extends BaseDelayWrapper<ImportedResourceRepo, ImportedResource> implements ImportedResourceRepo {
+class ImportedResourceDelayWrapper extends BaseDelayWrapper<ImportedResourceRepo, ImportedResource>
+    implements ImportedResourceRepo {
   ImportedResourceDelayWrapper(ImportedResourceRepo repo, int netDelay): super(repo, netDelay);
 }
 

@@ -62,7 +62,7 @@ class ImportedResourceListPage extends StatelessWidget {
       ];
     }
 
-    return  ChangeNotifierProxyProvider<ImportedResourceRepo, ImportedResourcePaginator>(
+    return ChangeNotifierProxyProvider<ImportedResourceRepo, ImportedResourcePaginator>(
       create: (context) => ImportedResourcePaginator(),
       update: (context, repo, prev) {
         if (prev!.repo != repo) {

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import 'data/api_client.dart';
 import 'data/config.dart';
-import 'data/consts.dart';
 import 'data/repos/imported_resources.dart';
 import 'data/repos/tag.dart';
 import 'data/repos/user.dart';
@@ -50,20 +49,34 @@ class App extends StatelessWidget {
 
 
 void main() {
+  Provider.debugCheckInvalidValueType = null;
+
   runApp(
     MultiProvider(
       providers: [
-        Provider(create: (context) => HttpApiClient(logHttp: logHttp)),
         ChangeNotifierProvider(create: (context) => Config()..restore()),
+        ChangeNotifierProxyProvider<Config, HttpApiClient?>(
+          create: (context) => null,
+          update: (context, config, client) => HttpApiClient(config: config)..restoreSettings(),
+        ),
         ChangeNotifierProxyProvider2<HttpApiClient, Config, UserRepo?>(
           create: (context) => null,
-          update: (context, client, config, repo) => createUserRepo(config, client),
+          update: (context, client, config, repo) {
+            if (repo is UserHttpRepo && repo.client == client) return repo;
+            return createUserRepo(config, client);
+          },
         ),
         ProxyProvider2<HttpApiClient, Config, ImportedResourceRepo>(
-          update: (context, client, config, repo) => createImportedResourceRepo(config, client),
+          update: (context, client, config, repo) {
+            if (repo is ImportedResourceHttpRepo && repo.client == client) return repo;
+            return createImportedResourceRepo(config, client);
+          },
         ),
         ProxyProvider2<HttpApiClient, Config, TagRepo>(
-          update: (context, client, config, repo) => createTagRepo(config, client),
+          update: (context, client, config, repo) {
+            if (repo is TagHttpRepo && repo.client == client) return repo;
+            return createTagRepo(config, client);
+          },
         ),
       ],
       child: App(),

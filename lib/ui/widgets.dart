@@ -271,7 +271,7 @@ Widget wrapActions(BuildContext context, Widget widget, List<ItemAction> actions
             backgroundColor: action.color,
             icon: action.icon,
             onPressed: action.action,
-          )
+          ),
       ],
     ),
     child: widget,
