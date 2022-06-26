@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 Future<void> showSimpleDialog(BuildContext parentContext, String title, String content) async {
   await showDialog(
     context: parentContext,
@@ -16,7 +15,6 @@ Future<void> showSimpleDialog(BuildContext parentContext, String title, String c
     ),
   );
 }
-
 
 Future<bool> showConfirmDialog(BuildContext parentContext, String title, String? content) async {
   return await showDialog(

@@ -6,12 +6,10 @@ import '../../utils/validators.dart';
 import '../dialogs.dart';
 import '../widgets.dart';
 
-
 class LoginPage extends StatefulWidget {
   @override
   LoginPageState createState() => LoginPageState();
 }
-
 
 class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
@@ -65,11 +63,12 @@ class LoginPageState extends State<LoginPage> {
               decoration: const InputDecoration(labelText: 'Пароль'),
             ),
             const SizedBox(height: 30),
-            _isLoading ? const BodyLoading()
+            _isLoading
+                ? const BodyLoading()
                 : ElevatedButton(
-                  child: const Text('Вход'),
-                  onPressed: _login,
-                ),
+                    child: const Text('Вход'),
+                    onPressed: _login,
+                  ),
           ],
         ),
       ),

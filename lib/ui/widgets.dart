@@ -8,7 +8,6 @@ import '../data/base_model.dart';
 import '../data/config.dart';
 import '../data/paginators.dart';
 
-
 class RetryItem extends StatelessWidget {
   final VoidCallback retry;
 
@@ -30,7 +29,6 @@ class RetryItem extends StatelessWidget {
     );
   }
 }
-
 
 class RetryBody extends StatelessWidget {
   final VoidCallback retry;
@@ -55,9 +53,8 @@ class RetryBody extends StatelessWidget {
   }
 }
 
-
 class EmptyBody extends StatelessWidget {
-  const EmptyBody({ Key? key }) : super(key: key);
+  const EmptyBody({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -66,9 +63,8 @@ class EmptyBody extends StatelessWidget {
   }
 }
 
-
 class BodyLoading extends StatelessWidget {
-  const BodyLoading({ Key? key }) : super(key: key);
+  const BodyLoading({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +72,8 @@ class BodyLoading extends StatelessWidget {
   }
 }
 
-
 class ItemLoading extends StatelessWidget {
-  const ItemLoading({ Key? key }) : super(key: key);
+  const ItemLoading({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +85,6 @@ class ItemLoading extends StatelessWidget {
     );
   }
 }
-
 
 class PaginatedListView<T extends BaseModel> extends StatelessWidget {
   final ScrollController? scrollController;
@@ -157,7 +151,6 @@ class PaginatedListView<T extends BaseModel> extends StatelessWidget {
   }
 }
 
-
 SnackBar createLoadingSnackBar() {
   return SnackBar(
     backgroundColor: Colors.yellowAccent,
@@ -176,7 +169,6 @@ SnackBar createLoadingSnackBar() {
   );
 }
 
-
 SnackBar createSuccessSnackBar() {
   return SnackBar(
     backgroundColor: Colors.greenAccent,
@@ -190,7 +182,6 @@ SnackBar createSuccessSnackBar() {
   );
 }
 
-
 SnackBar createErrorSnackBar(VoidCallback retry) {
   return SnackBar(
     backgroundColor: Colors.redAccent,
@@ -203,8 +194,11 @@ SnackBar createErrorSnackBar(VoidCallback retry) {
   );
 }
 
-
-Future<void> doWithBars(ScaffoldMessengerState scaffold, VoidCallback func, VoidCallback retry) async {
+Future<void> doWithBars(
+  ScaffoldMessengerState scaffold,
+  VoidCallback func,
+  VoidCallback retry,
+) async {
   scaffold.showSnackBar(createLoadingSnackBar());
 
   try {
@@ -219,12 +213,10 @@ Future<void> doWithBars(ScaffoldMessengerState scaffold, VoidCallback func, Void
   scaffold.showSnackBar(createSuccessSnackBar());
 }
 
-
 bool isWide(BuildContext context) {
   final width = MediaQuery.of(context).size.width;
   return width >= 600;
 }
-
 
 class ItemAction {
   final String label;
@@ -235,14 +227,12 @@ class ItemAction {
   ItemAction(this.label, this.icon, this.color, this.action);
 }
 
-
 Widget wrapActions(BuildContext context, Widget widget, List<ItemAction> actions) {
   if (context.read<Config>().isLinux) {
     return Listener(
       child: widget,
       onPointerDown: (event) async {
-        if (event.kind != PointerDeviceKind.mouse ||
-            event.buttons != kSecondaryMouseButton) {
+        if (event.kind != PointerDeviceKind.mouse || event.buttons != kSecondaryMouseButton) {
           return;
         }
 
@@ -258,7 +248,7 @@ Widget wrapActions(BuildContext context, Widget widget, List<ItemAction> actions
         if (menuItem != null) {
           menuItem(context);
         }
-      }
+      },
     );
   }
 

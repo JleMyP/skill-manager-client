@@ -9,12 +9,10 @@ import '../dialogs.dart';
 import '../store.dart';
 import '../widgets.dart';
 
-
 class TagViewPage extends StatefulWidget {
   @override
   TagViewState createState() => TagViewState();
 }
-
 
 class TagViewState extends State<TagViewPage> {
   Future? future;
@@ -34,9 +32,9 @@ class TagViewState extends State<TagViewPage> {
     }
 
     retry() async => setState(() {
-      // TODO: обновлять существующий
-      future = pair.paginator.repo!.getDetail(shortItem);
-    });
+          // TODO: обновлять существующий
+          future = pair.paginator.repo!.getDetail(shortItem);
+        });
 
     return FutureBuilder(
       future: future,
@@ -70,7 +68,6 @@ class TagViewState extends State<TagViewPage> {
     );
   }
 }
-
 
 class TagViewLoadedPage extends StatelessWidget {
   final Tag tag;
@@ -112,8 +109,7 @@ class TagViewLoadedPage extends StatelessWidget {
                   itemBuilder: (_) => [
                     PopupMenuItem(
                       value: _changeLike,
-                      child: tag.like ? const Text('Дизлайк')
-                        : const Text('Лайк'),
+                      child: tag.like ? const Text('Дизлайк') : const Text('Лайк'),
                     ),
                     PopupMenuItem(
                       value: _delete,
@@ -182,11 +178,10 @@ class TagViewLoadedPage extends StatelessWidget {
   }
 }
 
-
 class TagInfo extends StatelessWidget {
   final Tag tag;
 
-  TagInfo({required this.tag, Key? key}): super(key: key);
+  TagInfo({required this.tag, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -227,11 +222,10 @@ class TagInfo extends StatelessWidget {
   }
 }
 
-
 class TagValueListItem extends StatelessWidget {
   final TagValue value;
 
-  TagValueListItem({required this.value, Key? key}): super(key: key);
+  TagValueListItem({required this.value, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +236,6 @@ class TagValueListItem extends StatelessWidget {
     );
   }
 }
-
 
 class FloatingButton extends StatelessWidget {
   @override

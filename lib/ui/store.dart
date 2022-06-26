@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../data/base_model.dart';
 import '../data/paginators.dart';
 
-
 class ItemWithPaginator {
   final LimitOffsetPaginator paginator;
   final BaseModel item;
@@ -15,7 +14,6 @@ class ItemWithPaginator {
     this.shouldFetch = true,
   });
 }
-
 
 class SelectedScreenStore extends ChangeNotifier {
   int _screen = 0;
@@ -29,7 +27,6 @@ class SelectedScreenStore extends ChangeNotifier {
     notifyListeners();
   }
 }
-
 
 class SelectedPageStore extends ChangeNotifier {
   String _page;
@@ -46,7 +43,6 @@ class SelectedPageStore extends ChangeNotifier {
   }
 }
 
-
 class ButtonState extends ChangeNotifier {
   bool _show = true;
 
@@ -59,7 +55,6 @@ class ButtonState extends ChangeNotifier {
     notifyListeners();
   }
 }
-
 
 class BottomBarState extends ChangeNotifier {
   bool _show = true;

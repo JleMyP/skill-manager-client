@@ -3,7 +3,6 @@ import '../base_repository.dart';
 import '../config.dart';
 import '../models/tag.dart';
 
-
 abstract class TagRepo implements AbstractRepository<Tag> {
   Future<TagValue> addValue({
     required int tagId,
@@ -14,11 +13,10 @@ abstract class TagRepo implements AbstractRepository<Tag> {
   Future<void> removeValue(int tagId, int id);
 }
 
-
 class TagHttpRepo extends BaseHttpRepository<Tag> implements TagRepo {
   String get baseUrl => '/tags/';
 
-  TagHttpRepo({ client }): super(client: client, resultKey: 'results');
+  TagHttpRepo({client}) : super(client: client, resultKey: 'results');
 
   @override
   Tag parseItemFromList(JsonDict item) {
@@ -70,7 +68,6 @@ class TagHttpRepo extends BaseHttpRepository<Tag> implements TagRepo {
     await client.delete('$baseUrl$tagId/values/$id/');
   }
 }
-
 
 class TagFakeRepo extends BaseFakeRepository<Tag> implements TagRepo {
   TagValue parseTagValueFromList(JsonDict item) {
@@ -131,9 +128,8 @@ class TagFakeRepo extends BaseFakeRepository<Tag> implements TagRepo {
   Future<void> removeValue(int tagId, int id) async {}
 }
 
-
 class TagDelayWrapper extends BaseDelayWrapper<TagRepo, Tag> implements TagRepo {
-  TagDelayWrapper(TagRepo repo, int netDelay): super(repo, netDelay);
+  TagDelayWrapper(TagRepo repo, int netDelay) : super(repo, netDelay);
 
   Future<TagValue> addValue({
     required int tagId,

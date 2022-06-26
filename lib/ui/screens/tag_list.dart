@@ -10,9 +10,7 @@ import '../dialogs.dart';
 import '../store.dart';
 import '../widgets.dart';
 
-
 typedef TagPaginator = LimitOffsetPaginator<Tag>;
-
 
 class TagListPage extends StatelessWidget {
   static const name = 'tag_list_page';
@@ -47,12 +45,14 @@ class TagListPage extends StatelessWidget {
           icon: Icon(Icons.add),
           onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
         ),
-        Builder(builder: (context) => IconButton(
-          icon: Icon(Icons.filter_alt_outlined),
-          onPressed: () {
-            Scaffold.of(context).openEndDrawer();
-          },
-        )),
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.filter_alt_outlined),
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+          ),
+        ),
       ];
     }
 
@@ -97,12 +97,10 @@ class TagListPage extends StatelessWidget {
   }
 }
 
-
 class Body extends StatefulWidget {
   @override
   BodyState createState() => BodyState();
 }
-
 
 class BodyState extends State<Body> {
   final ScrollController _scrollController = ScrollController();
@@ -145,7 +143,6 @@ class BodyState extends State<Body> {
   }
 }
 
-
 class TagListItem extends StatefulWidget {
   final Tag tag;
 
@@ -157,7 +154,6 @@ class TagListItem extends StatefulWidget {
   @override
   State<TagListItem> createState() => TagListItemState();
 }
-
 
 class TagListItemState extends State<TagListItem> {
   bool _isLikeLoading = false;
@@ -173,7 +169,8 @@ class TagListItemState extends State<TagListItem> {
             trailing = const CircularProgressIndicator();
           } else {
             trailing = IconButton(
-              icon: item.like ? const Icon(Icons.favorite, color: Colors.red)
+              icon: item.like
+                  ? const Icon(Icons.favorite, color: Colors.red)
                   : const Icon(Icons.favorite_border),
               onPressed: _changeLike,
             );
@@ -217,11 +214,14 @@ class TagListItemState extends State<TagListItem> {
 
   _openItem() async {
     final paginator = context.read<TagPaginator>();
-    await Navigator.of(context).pushNamed('/tag/view', arguments: ItemWithPaginator(
-      paginator: paginator,
-      item: widget.tag,
-      shouldFetch: false,
-    ));
+    await Navigator.of(context).pushNamed(
+      '/tag/view',
+      arguments: ItemWithPaginator(
+        paginator: paginator,
+        item: widget.tag,
+        shouldFetch: false,
+      ),
+    );
   }
 
   _editItem(BuildContext context) async {
@@ -240,12 +240,10 @@ class TagListItemState extends State<TagListItem> {
   }
 }
 
-
 class TagFilter extends StatefulWidget {
   @override
   TagFilterState createState() => TagFilterState();
 }
-
 
 class TagFilterState extends State<TagFilter> {
   final _formKey = GlobalKey<FormState>();
@@ -311,11 +309,10 @@ class TagFilterState extends State<TagFilter> {
   }
 }
 
-
 class FloatingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FloatingActionButton(
-    child: const Icon(Icons.add),
-    onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
-  );
+        child: const Icon(Icons.add),
+        onPressed: () => Navigator.of(context).pushNamed('/tag/create'),
+      );
 }

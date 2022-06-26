@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import '../base_model.dart';
 
-
 class ImportedResource extends BaseModel {
   String name;
   String? description;
@@ -19,7 +18,7 @@ class ImportedResource extends BaseModel {
     required this.createdAt,
     required this.type,
     required this.typeSpecific,
-  }): super(id: id);
+  }) : super(id: id);
 
   void update({
     bool? isIgnored,

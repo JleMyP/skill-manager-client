@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-
 abstract class BaseModel extends ChangeNotifier {
   final int id;
   bool isDetailLoaded;

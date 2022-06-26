@@ -6,12 +6,10 @@ import '../../data/api_client.dart';
 import '../../data/config.dart';
 import '../../utils/validators.dart';
 
-
 class SettingsPage extends StatefulWidget {
   @override
   SettingsPageState createState() => SettingsPageState();
 }
-
 
 class SettingsPageState extends State<SettingsPage> {
   final _formKey = GlobalKey<FormState>();

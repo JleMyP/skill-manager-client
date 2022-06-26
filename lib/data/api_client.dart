@@ -11,10 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './config.dart';
 import '../utils/logger.dart';
 
-
 typedef JsonDict = Map<String, dynamic>;
 typedef Params = Map<String, dynamic>;
-
 
 class ApiException implements Exception {
   String? message;
@@ -26,7 +24,6 @@ class ApiException implements Exception {
   @override
   String toString() => message ?? originalException?.toString() ?? '';
 }
-
 
 class JwtTokenPair {
   String access;
@@ -49,7 +46,6 @@ class JwtTokenPair {
         tokenType: 'Token',
       );
 }
-
 
 class SpTokenStorage implements TokenStorage<OAuth2Token> {
   static const _accessKey = 'auth:jwt:access';
@@ -83,7 +79,6 @@ class SpTokenStorage implements TokenStorage<OAuth2Token> {
     await sharedPreferences.remove(_refreshKey);
   }
 }
-
 
 class HttpApiClient extends ChangeNotifier {
   static const _authUrl = '/v1/token/';
@@ -155,7 +150,7 @@ class HttpApiClient extends ChangeNotifier {
 
   Future<void> restoreSettings() async {
     final sharedPreferences = await SharedPreferences.getInstance();
-    baseUrl = sharedPreferences.getString(_baseUrlKey) ??  _defaultBackendApiUrl;
+    baseUrl = sharedPreferences.getString(_baseUrlKey) ?? _defaultBackendApiUrl;
     notifyListeners();
   }
 

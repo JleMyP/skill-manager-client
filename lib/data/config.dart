@@ -4,11 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class Config extends ChangeNotifier {
   static const bool _defaultLogHttp = bool.fromEnvironment('LOG_HTTP', defaultValue: true);
-  static const String _defaultBackendApiUrl = String.fromEnvironment('BACKEND_API_URL',
-      defaultValue: 'http://localhost:8000/api');
+  static const String _defaultBackendApiUrl =
+      String.fromEnvironment('BACKEND_API_URL', defaultValue: 'http://localhost:8000/api');
   static const _logConsole = bool.fromEnvironment('LOG_CONSOLE', defaultValue: true);
 
   bool _isInitialized = false;

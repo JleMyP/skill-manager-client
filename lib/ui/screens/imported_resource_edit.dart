@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/imported_resource.dart';
 
-
 class ImportedResourceEditPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

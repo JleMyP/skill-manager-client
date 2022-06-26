@@ -1,14 +1,12 @@
 import 'api_client.dart';
 import 'base_model.dart';
 
-
 class ResultAndMeta<T> {
   List<T> result;
   Map<String, dynamic>? meta;
 
   ResultAndMeta(this.result, [this.meta]);
 }
-
 
 abstract class AbstractRepository<T extends BaseModel> {
   Future<ResultAndMeta<T>> getList({Params? params});
@@ -24,7 +22,6 @@ abstract class AbstractRepository<T extends BaseModel> {
 
   Future<T> createItem(JsonDict data);
 }
-
 
 abstract class BaseHttpRepository<T extends BaseModel> implements AbstractRepository<T> {
   late HttpApiClient client;
@@ -100,15 +97,11 @@ abstract class BaseHttpRepository<T extends BaseModel> implements AbstractReposi
   }
 }
 
-
 abstract class BaseFakeRepository<T extends BaseModel> implements AbstractRepository<T> {
   int get fakeListCount => 30;
 
   Future<ResultAndMeta<T>> getList({Params? params}) async {
-    final list = [
-      for (var i = 0; i < fakeListCount; i++)
-        fakeItemForList(i)
-    ];
+    final list = [for (var i = 0; i < fakeListCount; i++) fakeItemForList(i)];
 
     return ResultAndMeta<T>(list);
   }
@@ -143,7 +136,6 @@ abstract class BaseFakeRepository<T extends BaseModel> implements AbstractReposi
     return fakeItemForList(i);
   }
 }
-
 
 abstract class BaseDelayWrapper<T extends AbstractRepository<I>, I extends BaseModel> {
   final T repo;

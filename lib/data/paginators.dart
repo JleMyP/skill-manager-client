@@ -7,7 +7,6 @@ import '../utils/logger.dart';
 import 'base_model.dart';
 import 'base_repository.dart';
 
-
 class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   AbstractRepository<K>? repo;
   int limit;
@@ -22,10 +21,10 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
   late Logger _logger;
 
   LimitOffsetPaginator({
-      this.repo,
-      this.limit = 25,
+    this.repo,
+    this.limit = 25,
     Map<String, dynamic>? baseParams,
-      Logger? logger,
+    Logger? logger,
   }) {
     _baseParams = baseParams ?? {};
     _logger = logger ?? createLogger();
@@ -74,7 +73,8 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
       return;
     }
 
-    if (_items == null || _params == null) {  // еще не скачали первую страницу
+    if (_items == null || _params == null) {
+      // еще не скачали первую страницу
       _params = {
         'limit': limit,
         'offset': 0,
@@ -100,7 +100,7 @@ class LimitOffsetPaginator<K extends BaseModel> extends ChangeNotifier {
     ResultAndMeta<K> pair;
     try {
       pair = await repo!.getList(params: _params);
-    } on Exception catch(e, s) {
+    } on Exception catch (e, s) {
       _isFailed = true;
       _isLoading = false;
       _logger.e('get list error', e, s);

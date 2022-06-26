@@ -3,16 +3,13 @@ import '../base_repository.dart';
 import '../config.dart';
 import '../models/imported_resource.dart';
 
-
 abstract class ImportedResourceRepo implements AbstractRepository<ImportedResource> {}
-
 
 class ImportedResourceHttpRepo extends BaseHttpRepository<ImportedResource>
     implements ImportedResourceRepo {
   String get baseUrl => '/imported_resources/';
 
-  ImportedResourceHttpRepo({ HttpApiClient? client }):
-    super(client: client, resultKey: 'results');
+  ImportedResourceHttpRepo({HttpApiClient? client}) : super(client: client, resultKey: 'results');
 
   @override
   ImportedResource parseItemFromList(JsonDict item) {
@@ -33,7 +30,6 @@ class ImportedResourceHttpRepo extends BaseHttpRepository<ImportedResource>
     return await super.updateItem(item, data);
   }
 }
-
 
 class ImportedResourceFakeRepo extends BaseFakeRepository<ImportedResource>
     implements ImportedResourceRepo {
@@ -57,10 +53,9 @@ class ImportedResourceFakeRepo extends BaseFakeRepository<ImportedResource>
   }
 }
 
-
 class ImportedResourceDelayWrapper extends BaseDelayWrapper<ImportedResourceRepo, ImportedResource>
     implements ImportedResourceRepo {
-  ImportedResourceDelayWrapper(ImportedResourceRepo repo, int netDelay): super(repo, netDelay);
+  ImportedResourceDelayWrapper(ImportedResourceRepo repo, int netDelay) : super(repo, netDelay);
 }
 
 ImportedResourceRepo createImportedResourceRepo(Config config, HttpApiClient? client) {

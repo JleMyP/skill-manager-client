@@ -4,7 +4,6 @@ import '../api_client.dart';
 import '../config.dart';
 import '../models/user.dart';
 
-
 abstract class UserRepo implements ChangeNotifier {
   User? get currentUser;
 
@@ -12,7 +11,6 @@ abstract class UserRepo implements ChangeNotifier {
   Future<User> reload();
   void logout();
 }
-
 
 class UserHttpRepo extends ChangeNotifier implements UserRepo {
   final HttpApiClient _client;
@@ -44,7 +42,6 @@ class UserHttpRepo extends ChangeNotifier implements UserRepo {
   }
 }
 
-
 class UserFakeRepo extends ChangeNotifier implements UserRepo {
   User? _currentUser;
   User? get currentUser => _currentUser;
@@ -66,7 +63,6 @@ class UserFakeRepo extends ChangeNotifier implements UserRepo {
     notifyListeners();
   }
 }
-
 
 class UserDelayWrapper extends ChangeNotifier implements UserRepo {
   final UserRepo _repo;
@@ -97,7 +93,6 @@ class UserDelayWrapper extends ChangeNotifier implements UserRepo {
 
   Future<void> _delay() => Future.delayed(Duration(seconds: _netDelay));
 }
-
 
 UserRepo createUserRepo(Config config, HttpApiClient client) {
   UserRepo repo;

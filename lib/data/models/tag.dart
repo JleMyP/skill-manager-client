@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import '../base_model.dart';
 
-
 class TagValue extends BaseModel {
   String name;
   int orderNum;
@@ -17,7 +16,7 @@ class TagValue extends BaseModel {
     required this.createdAt,
     this.icon,
     required this.isDefault,
-  }): super(id: id, isDetailLoaded: true);
+  }) : super(id: id, isDetailLoaded: true);
 
   void update({String? name, int? orderNum, String? icon, bool? isDefault}) {
     var changed = false;
@@ -57,7 +56,6 @@ class TagValue extends BaseModel {
   }
 }
 
-
 class Tag extends BaseModel {
   String name;
   int orderNum;
@@ -78,7 +76,7 @@ class Tag extends BaseModel {
     this.color,
     required this.targetType,
     required this.values,
-  }): super(id: id, isDetailLoaded: true);
+  }) : super(id: id, isDetailLoaded: true);
 
   void update({
     String? name,

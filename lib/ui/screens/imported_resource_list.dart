@@ -10,7 +10,6 @@ import '../dialogs.dart';
 import '../store.dart';
 import '../widgets.dart';
 
-
 final _github = SvgPicture.asset(
   'assets/github-logo.svg',
   width: 30,
@@ -23,7 +22,6 @@ final typeMap = {
 };
 
 typedef ImportedResourcePaginator = LimitOffsetPaginator<ImportedResource>;
-
 
 class ImportedResourceListPage extends StatelessWidget {
   static const name = 'imported_resource_list_page';
@@ -53,12 +51,14 @@ class ImportedResourceListPage extends StatelessWidget {
             paginator.fetchNext();
           },
         ),
-        Builder(builder: (context) => IconButton(
-          icon: const Icon(Icons.filter_alt_outlined),
-          onPressed: () {
-            Scaffold.of(context).openEndDrawer();
-          },
-        )),
+        Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.filter_alt_outlined),
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+          ),
+        ),
       ];
     }
 
@@ -94,7 +94,6 @@ class ImportedResourceListPage extends StatelessWidget {
   }
 }
 
-
 class ImportedResourceListItem extends StatefulWidget {
   final ImportedResource importedResource;
 
@@ -106,7 +105,6 @@ class ImportedResourceListItem extends StatefulWidget {
   @override
   State<ImportedResourceListItem> createState() => ImportedResourceListItemState();
 }
-
 
 class ImportedResourceListItemState extends State<ImportedResourceListItem> {
   bool _isIgnoreLoading = false;
@@ -203,12 +201,10 @@ class ImportedResourceListItemState extends State<ImportedResourceListItem> {
   }
 }
 
-
 class ImportedResourceFilter extends StatefulWidget {
   @override
   ImportedResourceFilterState createState() => ImportedResourceFilterState();
 }
-
 
 class ImportedResourceFilterState extends State<ImportedResourceFilter> {
   final _formKey = GlobalKey<FormState>();

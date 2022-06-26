@@ -10,12 +10,10 @@ import '../store.dart';
 import '../webview.dart';
 import '../widgets.dart';
 
-
 class ImportedResourceViewPage extends StatefulWidget {
   @override
   ImportedResourceViewState createState() => ImportedResourceViewState();
 }
-
 
 class ImportedResourceViewState extends State<ImportedResourceViewPage> {
   Future? future;
@@ -35,9 +33,9 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
     }
 
     retry() async => setState(() {
-      // TODO: обновлять существующий
-      future = pair.paginator.repo!.getDetail(shortItem);
-    });
+          // TODO: обновлять существующий
+          future = pair.paginator.repo!.getDetail(shortItem);
+        });
 
     return FutureBuilder(
       future: future,
@@ -69,7 +67,6 @@ class ImportedResourceViewState extends State<ImportedResourceViewPage> {
     );
   }
 }
-
 
 class ImportedResourceViewLoadedPage extends StatelessWidget {
   final ImportedResource importedResource;
@@ -111,8 +108,9 @@ class ImportedResourceViewLoadedPage extends StatelessWidget {
                   itemBuilder: (_) => [
                     PopupMenuItem(
                       value: _changeIgnore,
-                      child: importedResource.isIgnored ? const Text('Разигнорить')
-                        : const Text('Заигнорить'),
+                      child: importedResource.isIgnored
+                          ? const Text('Разигнорить')
+                          : const Text('Заигнорить'),
                     ),
                     PopupMenuItem(
                       value: _createResource,
@@ -157,7 +155,10 @@ class ImportedResourceViewLoadedPage extends StatelessWidget {
   _changeIgnore(BuildContext context) async {
     doWithBars(
       _scaffoldKey.currentState!,
-      () => paginator.repo!.updateItem(importedResource, {'is_ignored': !importedResource.isIgnored}),
+      () => paginator.repo!.updateItem(
+        importedResource,
+        {'is_ignored': !importedResource.isIgnored},
+      ),
       () => _changeIgnore(context),
     );
   }

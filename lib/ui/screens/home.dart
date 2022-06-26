@@ -12,7 +12,6 @@ import '../widgets.dart';
 import 'imported_resource_list.dart';
 import 'tag_list.dart';
 
-
 class HomePageWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -29,7 +28,6 @@ class HomePageWrapper extends StatelessWidget {
     return await showConfirmDialog(context, 'Выйти?', null);
   }
 }
-
 
 class HomePage extends StatelessWidget {
   final _sideMenuKey = GlobalKey<SideMenuState>();
@@ -84,7 +82,6 @@ class HomePage extends StatelessWidget {
     }
   }
 }
-
 
 class LeftMenu extends StatelessWidget {
   final Function? sideMenuTap;
@@ -147,11 +144,12 @@ class LeftMenu extends StatelessWidget {
           },
         ),
         const Divider(height: 50),
-        if (config.logConsole) ListTile(
-          leading: const Icon(Icons.insert_drive_file),
-          title: const Text('Логи'),
-          onTap: () => _showLogs(context),
-        ),
+        if (config.logConsole)
+          ListTile(
+            leading: const Icon(Icons.insert_drive_file),
+            title: const Text('Логи'),
+            onTap: () => _showLogs(context),
+          ),
         ListTile(
           leading: const Icon(Icons.logout),
           title: const Text('Выход'),
